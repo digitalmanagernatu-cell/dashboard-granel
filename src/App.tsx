@@ -6,10 +6,9 @@ import { useTransferData } from './hooks/useTransferData';
 import type { TransferReceipt } from './types/transfer';
 import './App.css';
 
-// Configuration - these should be set in environment variables
-const SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SPREADSHEET_ID || '';
-const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
-const SHEET_RANGE = import.meta.env.VITE_SHEET_RANGE || 'Sheet1!A:E';
+// Configuration - can be overridden with environment variables
+const SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SPREADSHEET_ID || '15U2O68kl7xuBbA_P2WWaA93p5o4fc_RWjY6Knkqd43Q';
+const SHEET_GID = import.meta.env.VITE_SHEET_GID || '0';
 
 function App() {
   const [selectedTransfer, setSelectedTransfer] = useState<TransferReceipt | null>(null);
@@ -23,8 +22,7 @@ function App() {
     refresh,
   } = useTransferData({
     spreadsheetId: SPREADSHEET_ID,
-    range: SHEET_RANGE,
-    apiKey: API_KEY,
+    sheetGid: SHEET_GID,
   });
 
   const handleViewReceipt = (transfer: TransferReceipt) => {
@@ -46,44 +44,20 @@ function App() {
       </header>
 
       <main className="app-main">
-        {!SPREADSHEET_ID || !API_KEY ? (
-          <div className="config-warning">
-            <h2>Configuración requerida</h2>
-            <p>Para usar este dashboard, necesitas configurar las siguientes variables de entorno:</p>
-            <ul>
-              <li><code>VITE_GOOGLE_SPREADSHEET_ID</code> - ID del Google Sheet</li>
-              <li><code>VITE_GOOGLE_API_KEY</code> - API Key de Google</li>
-              <li><code>VITE_SHEET_RANGE</code> - Rango de celdas (opcional, por defecto: Sheet1!A:E)</li>
-            </ul>
-            <p>Crea un archivo <code>.env</code> en la raíz del proyecto con estas variables.</p>
-            <div className="config-help">
-              <h3>Cómo obtener estos valores:</h3>
-              <ol>
-                <li>Abre tu Google Sheet y copia el ID de la URL (la parte entre /d/ y /edit)</li>
-                <li>Ve a <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a></li>
-                <li>Crea un proyecto y habilita la Google Sheets API</li>
-                <li>Crea una API Key en Credenciales</li>
-                <li>Asegúrate de que el Google Sheet sea público o accesible con la API Key</li>
-              </ol>
-            </div>
+        <TransferFilters filters={filters} onFiltersChange={setFilters} />
+
+        {error && (
+          <div className="error-message">
+            <strong>Error:</strong> {error}
+            <p>Asegúrate de que el Google Sheet sea público (cualquiera con el enlace puede ver).</p>
           </div>
-        ) : (
-          <>
-            <TransferFilters filters={filters} onFiltersChange={setFilters} />
-
-            {error && (
-              <div className="error-message">
-                <strong>Error:</strong> {error}
-              </div>
-            )}
-
-            <TransferTable
-              transfers={transfers}
-              onViewReceipt={handleViewReceipt}
-              loading={loading}
-            />
-          </>
         )}
+
+        <TransferTable
+          transfers={transfers}
+          onViewReceipt={handleViewReceipt}
+          loading={loading}
+        />
       </main>
 
       <ReceiptModal transfer={selectedTransfer} onClose={handleCloseModal} />

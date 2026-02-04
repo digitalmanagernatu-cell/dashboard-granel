@@ -12,7 +12,3 @@ export interface TransferFilters {
   clientSearch: string;
   orderSearch: string;
 }
-
-export interface GoogleSheetsResponse {
-  values: string[][];
-}

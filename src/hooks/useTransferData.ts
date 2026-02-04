@@ -5,11 +5,10 @@ import { subDays, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 
 interface UseTransferDataOptions {
   spreadsheetId: string;
-  range: string;
-  apiKey: string;
+  sheetGid?: string;
 }
 
-export function useTransferData({ spreadsheetId, range, apiKey }: UseTransferDataOptions) {
+export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDataOptions) {
   const [allTransfers, setAllTransfers] = useState<TransferReceipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +21,8 @@ export function useTransferData({ spreadsheetId, range, apiKey }: UseTransferDat
 
   useEffect(() => {
     async function loadData() {
-      if (!spreadsheetId || !apiKey) {
-        setError('Configuración incompleta: falta el ID del spreadsheet o la API key');
+      if (!spreadsheetId) {
+        setError('Configuración incompleta: falta el ID del spreadsheet');
         setLoading(false);
         return;
       }
@@ -31,7 +30,7 @@ export function useTransferData({ spreadsheetId, range, apiKey }: UseTransferDat
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchTransferReceipts(spreadsheetId, range, apiKey);
+        const data = await fetchTransferReceipts(spreadsheetId, sheetGid);
         setAllTransfers(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al cargar los datos');
@@ -41,7 +40,7 @@ export function useTransferData({ spreadsheetId, range, apiKey }: UseTransferDat
     }
 
     loadData();
-  }, [spreadsheetId, range, apiKey]);
+  }, [spreadsheetId, sheetGid]);
 
   const filteredTransfers = useMemo(() => {
     return allTransfers.filter((transfer) => {
@@ -85,7 +84,7 @@ export function useTransferData({ spreadsheetId, range, apiKey }: UseTransferDat
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchTransferReceipts(spreadsheetId, range, apiKey);
+      const data = await fetchTransferReceipts(spreadsheetId, sheetGid);
       setAllTransfers(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar los datos');
