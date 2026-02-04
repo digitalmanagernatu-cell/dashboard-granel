@@ -1,16 +1,35 @@
 import type { TransferReceipt } from '../types/transfer';
 
 /**
- * Formats a Google Sheets date string like "Date(2026,1,4)" to "04/02/2026"
+ * Formats a date string to DD/MM/YYYY format
+ * Handles: Date(2026,1,4), 2026-02-04, 2026/02/04
  */
-function formatGoogleDate(dateString: string): string {
-  const match = dateString.match(/Date\((\d+),(\d+),(\d+)\)/);
-  if (match) {
-    const year = match[1];
-    const month = String(parseInt(match[2], 10) + 1).padStart(2, '0');
-    const day = match[3].padStart(2, '0');
+function formatToSpanishDate(dateString: string): string {
+  if (!dateString) return '';
+
+  // Handle Google Sheets date format: Date(year, month, day)
+  const googleMatch = dateString.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (googleMatch) {
+    const year = googleMatch[1];
+    const month = String(parseInt(googleMatch[2], 10) + 1).padStart(2, '0');
+    const day = googleMatch[3].padStart(2, '0');
     return `${day}/${month}/${year}`;
   }
+
+  // Handle ISO format: YYYY-MM-DD or YYYY/MM/DD
+  const isoMatch = dateString.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if (isoMatch) {
+    const year = isoMatch[1];
+    const month = isoMatch[2].padStart(2, '0');
+    const day = isoMatch[3].padStart(2, '0');
+    return `${day}/${month}/${year}`;
+  }
+
+  // If already in DD/MM/YYYY format, return as is
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
+    return dateString;
+  }
+
   return dateString;
 }
 
@@ -51,16 +70,13 @@ export async function fetchTransferReceipts(
 
   return rows.map((row: { c: Array<{ v: string | number | null; f?: string } | null> }) => {
     const cells = row.c || [];
-    // For dates, Google Sheets provides 'f' (formatted) and 'v' (value)
-    // Use 'f' if available for better display, otherwise format 'v'
+    // For dates, always format to DD/MM/YYYY regardless of source format
     const dateCell = cells[3];
     let submissionDate = '';
     if (dateCell) {
-      if (dateCell.f) {
-        submissionDate = dateCell.f;
-      } else if (dateCell.v) {
-        submissionDate = formatGoogleDate(dateCell.v.toString());
-      }
+      // Prefer formatted value (f) but always convert to Spanish format
+      const rawDate = dateCell.f || dateCell.v?.toString() || '';
+      submissionDate = formatToSpanishDate(rawDate);
     }
 
     return {
@@ -85,12 +101,21 @@ export function parseDate(dateString: string): Date | null {
     return new Date(year, month, day);
   }
 
-  // Handle common Spanish date formats: DD/MM/YYYY or DD-MM-YYYY
-  const parts = dateString.split(/[\/\-]/);
-  if (parts.length === 3) {
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const year = parseInt(parts[2], 10);
+  // Handle ISO format: YYYY-MM-DD or YYYY/MM/DD
+  const isoMatch = dateString.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if (isoMatch) {
+    const year = parseInt(isoMatch[1], 10);
+    const month = parseInt(isoMatch[2], 10) - 1;
+    const day = parseInt(isoMatch[3], 10);
+    return new Date(year, month, day);
+  }
+
+  // Handle Spanish date formats: DD/MM/YYYY or DD-MM-YYYY
+  const spanishMatch = dateString.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})$/);
+  if (spanishMatch) {
+    const day = parseInt(spanishMatch[1], 10);
+    const month = parseInt(spanishMatch[2], 10) - 1;
+    const year = parseInt(spanishMatch[3], 10);
     const fullYear = year < 100 ? 2000 + year : year;
     return new Date(fullYear, month, day);
   }
