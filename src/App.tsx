@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TransferFilters } from './components/TransferFilters';
 import { TransferTable } from './components/TransferTable';
 import { ReceiptModal } from './components/ReceiptModal';
@@ -10,8 +10,18 @@ import './App.css';
 const SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SPREADSHEET_ID || '15U2O68kl7xuBbA_P2WWaA93p5o4fc_RWjY6Knkqd43Q';
 const SHEET_GID = import.meta.env.VITE_SHEET_GID || '0';
 
+function formatLastUpdate(date: Date): string {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
+
 function App() {
   const [selectedTransfer, setSelectedTransfer] = useState<TransferReceipt | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const {
     transfers,
@@ -24,6 +34,12 @@ function App() {
     spreadsheetId: SPREADSHEET_ID,
     sheetGid: SHEET_GID,
   });
+
+  useEffect(() => {
+    if (!loading && !error) {
+      setLastUpdate(new Date());
+    }
+  }, [loading, error]);
 
   const handleViewReceipt = (transfer: TransferReceipt) => {
     setSelectedTransfer(transfer);
@@ -41,9 +57,16 @@ function App() {
           <h1>Justificantes Transferencias</h1>
           <p className="subtitle">Granel NATU</p>
         </div>
-        <button onClick={refresh} className="btn-refresh" disabled={loading}>
-          {loading ? 'Actualizando...' : 'Actualizar datos'}
-        </button>
+        <div className="header-actions">
+          {lastUpdate && (
+            <span className="last-update">
+              Última actualización: {formatLastUpdate(lastUpdate)}
+            </span>
+          )}
+          <button onClick={refresh} className="btn-refresh" disabled={loading}>
+            {loading ? 'Actualizando...' : 'Actualizar datos'}
+          </button>
+        </div>
       </header>
 
       <main className="app-main">
