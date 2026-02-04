@@ -8,13 +8,24 @@
 
 /* Header */
 .app-header {
-  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  background-color: #3e3f3e;
   color: white;
-  padding: 1.5rem 2rem;
+  padding: 1rem 2rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.header-logo {
+  height: 50px;
+  width: auto;
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
 }
 
 .app-header h1 {
