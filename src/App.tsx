@@ -89,7 +89,7 @@ function App() {
       <ReceiptModal transfer={selectedTransfer} onClose={handleCloseModal} />
 
       <footer className="app-footer">
-        <p>Dashboard Granel NATU - Justificantes de Transferencia</p>
+        <p>Dashboard Granel - by DigitalManager NATU</p>
       </footer>
     </div>
   );
