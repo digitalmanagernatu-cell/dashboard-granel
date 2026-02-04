@@ -174,17 +174,18 @@
 
 .btn-reset {
   padding: 0.5rem 1rem;
-  background-color: #6b7280;
-  color: white;
+  background-color: #dcd5be;
+  color: #000000;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
+  font-weight: 500;
   transition: background-color 0.2s;
 }
 
 .btn-reset:hover {
-  background-color: #4b5563;
+  background-color: #cec7ac;
 }
 
 /* Error Message */
@@ -233,17 +234,18 @@
 
 .btn-view-receipt {
   padding: 0.375rem 0.75rem;
-  background-color: #4a7c59;
-  color: white;
+  background-color: #d3d7c4;
+  color: #000000;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8125rem;
+  font-weight: 500;
   transition: background-color 0.2s;
 }
 
 .btn-view-receipt:hover {
-  background-color: #3d6549;
+  background-color: #c4c9b4;
 }
 
 .no-receipt {
