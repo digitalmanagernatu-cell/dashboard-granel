@@ -36,8 +36,11 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Dashboard Justificantes de Transferencia</h1>
-        <p className="subtitle">Granel NATU</p>
+        <img src="/dashboard-granel/logo.png" alt="Logo" className="header-logo" />
+        <div className="header-titles">
+          <h1>Justificantes Transferencias</h1>
+          <p className="subtitle">Granel NATU</p>
+        </div>
         <button onClick={refresh} className="btn-refresh" disabled={loading}>
           {loading ? 'Actualizando...' : 'Actualizar datos'}
         </button>
