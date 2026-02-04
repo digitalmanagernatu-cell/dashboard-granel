@@ -1,6 +1,20 @@
 import type { TransferReceipt } from '../types/transfer';
 
 /**
+ * Formats a Google Sheets date string like "Date(2026,1,4)" to "04/02/2026"
+ */
+function formatGoogleDate(dateString: string): string {
+  const match = dateString.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (match) {
+    const year = match[1];
+    const month = String(parseInt(match[2], 10) + 1).padStart(2, '0');
+    const day = match[3].padStart(2, '0');
+    return `${day}/${month}/${year}`;
+  }
+  return dateString;
+}
+
+/**
  * Fetches transfer receipts from a public Google Sheet
  * Uses the public visualization endpoint (no API key required)
  */
@@ -35,13 +49,25 @@ export async function fetchTransferReceipts(
   // Skip header row if present and map data
   const rows = data.table.rows;
 
-  return rows.map((row: { c: Array<{ v: string | number | null } | null> }) => {
+  return rows.map((row: { c: Array<{ v: string | number | null; f?: string } | null> }) => {
     const cells = row.c || [];
+    // For dates, Google Sheets provides 'f' (formatted) and 'v' (value)
+    // Use 'f' if available for better display, otherwise format 'v'
+    const dateCell = cells[3];
+    let submissionDate = '';
+    if (dateCell) {
+      if (dateCell.f) {
+        submissionDate = dateCell.f;
+      } else if (dateCell.v) {
+        submissionDate = formatGoogleDate(dateCell.v.toString());
+      }
+    }
+
     return {
       clientNumber: cells[0]?.v?.toString() || '',
       clientName: cells[1]?.v?.toString() || '',
       orderNumber: cells[2]?.v?.toString() || '',
-      submissionDate: cells[3]?.v?.toString() || '',
+      submissionDate,
       receiptUrl: cells[4]?.v?.toString() || '',
     };
   });
