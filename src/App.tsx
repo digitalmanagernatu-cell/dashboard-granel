@@ -9,6 +9,7 @@ import './App.css';
 // Configuration - can be overridden with environment variables
 const SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SPREADSHEET_ID || '15U2O68kl7xuBbA_P2WWaA93p5o4fc_RWjY6Knkqd43Q';
 const SHEET_GID = import.meta.env.VITE_SHEET_GID || '0';
+const VIEWED_STORAGE_KEY = 'granel-viewed-receipts';
 
 function formatLastUpdate(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
@@ -19,9 +20,17 @@ function formatLastUpdate(date: Date): string {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
+function getTransferId(transfer: TransferReceipt): string {
+  return `${transfer.clientNumber}-${transfer.orderNumber}-${transfer.submissionDate}`;
+}
+
 function App() {
   const [selectedTransfer, setSelectedTransfer] = useState<TransferReceipt | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [viewedReceipts, setViewedReceipts] = useState<Set<string>>(() => {
+    const stored = localStorage.getItem(VIEWED_STORAGE_KEY);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  });
 
   const {
     transfers,
@@ -41,7 +50,13 @@ function App() {
     }
   }, [loading, error]);
 
+  useEffect(() => {
+    localStorage.setItem(VIEWED_STORAGE_KEY, JSON.stringify([...viewedReceipts]));
+  }, [viewedReceipts]);
+
   const handleViewReceipt = (transfer: TransferReceipt) => {
+    const id = getTransferId(transfer);
+    setViewedReceipts(prev => new Set([...prev, id]));
     setSelectedTransfer(transfer);
   };
 
@@ -83,6 +98,8 @@ function App() {
           transfers={transfers}
           onViewReceipt={handleViewReceipt}
           loading={loading}
+          viewedReceipts={viewedReceipts}
+          getTransferId={getTransferId}
         />
       </main>
 
