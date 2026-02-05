@@ -80,11 +80,11 @@ export async function fetchTransferReceipts(
     }
 
     return {
-      clientNumber: cells[0]?.v?.toString() || '',
-      clientName: cells[1]?.v?.toString() || '',
-      orderNumber: cells[2]?.v?.toString() || '',
+      clientNumber: cells[0]?.f || cells[0]?.v?.toString() || '',
+      clientName: cells[1]?.f || cells[1]?.v?.toString() || '',
+      orderNumber: cells[2]?.f || cells[2]?.v?.toString() || '',
       submissionDate,
-      receiptUrl: cells[4]?.v?.toString() || '',
+      receiptUrl: cells[4]?.f || cells[4]?.v?.toString() || '',
     };
   });
 }
