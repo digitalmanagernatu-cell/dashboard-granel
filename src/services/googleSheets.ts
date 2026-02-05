@@ -68,23 +68,34 @@ export async function fetchTransferReceipts(
   // Skip header row if present and map data
   const rows = data.table.rows;
 
-  return rows.map((row: { c: Array<{ v: string | number | null; f?: string } | null> }) => {
+  // Helper to safely extract cell value from Google Sheets response
+  // Handles: { v: "text" }, { v: 123 }, { v: null, f: "text" }, null, undefined
+  const getCellValue = (cell: { v?: unknown; f?: string } | null | undefined): string => {
+    if (cell === null || cell === undefined) return '';
+    // Prefer formatted value (f) which preserves text formatting
+    if (typeof cell.f === 'string' && cell.f !== '') return cell.f;
+    // Fall back to raw value (v)
+    if (cell.v !== null && cell.v !== undefined) return String(cell.v);
+    return '';
+  };
+
+  return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }) => {
     const cells = row.c || [];
+
     // For dates, always format to DD/MM/YYYY regardless of source format
     const dateCell = cells[3];
     let submissionDate = '';
     if (dateCell) {
-      // Prefer formatted value (f) but always convert to Spanish format
-      const rawDate = dateCell.f || dateCell.v?.toString() || '';
+      const rawDate = getCellValue(dateCell);
       submissionDate = formatToSpanishDate(rawDate);
     }
 
     return {
-      clientNumber: cells[0]?.f || cells[0]?.v?.toString() || '',
-      clientName: cells[1]?.f || cells[1]?.v?.toString() || '',
-      orderNumber: cells[2]?.f || cells[2]?.v?.toString() || '',
+      clientNumber: getCellValue(cells[0]),
+      clientName: getCellValue(cells[1]),
+      orderNumber: getCellValue(cells[2]),
       submissionDate,
-      receiptUrl: cells[4]?.f || cells[4]?.v?.toString() || '',
+      receiptUrl: getCellValue(cells[4]),
     };
   });
 }
