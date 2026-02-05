@@ -8,19 +8,31 @@
 
 /* Header */
 .app-header {
-  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  background-color: #3e3f3e;
   color: white;
-  padding: 1.5rem 2rem;
+  padding: 1rem 2rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
+.header-logo {
+  height: 50px;
+  width: auto;
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
 .app-header h1 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
+  color: white;
 }
 
 .app-header .subtitle {
@@ -29,8 +41,20 @@
   font-size: 0.9rem;
 }
 
-.btn-refresh {
+.header-actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.last-update {
+  color: white;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.btn-refresh {
   padding: 0.5rem 1rem;
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
@@ -150,17 +174,18 @@
 
 .btn-reset {
   padding: 0.5rem 1rem;
-  background-color: #6b7280;
-  color: white;
+  background-color: #dcd5be;
+  color: #000000;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
+  font-weight: 500;
   transition: background-color 0.2s;
 }
 
 .btn-reset:hover {
-  background-color: #4b5563;
+  background-color: #cec7ac;
 }
 
 /* Error Message */
@@ -209,17 +234,18 @@
 
 .btn-view-receipt {
   padding: 0.375rem 0.75rem;
-  background-color: #4a7c59;
-  color: white;
+  background-color: #d3d7c4;
+  color: #000000;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8125rem;
+  font-weight: 500;
   transition: background-color 0.2s;
 }
 
 .btn-view-receipt:hover {
-  background-color: #3d6549;
+  background-color: #c4c9b4;
 }
 
 .no-receipt {
