@@ -227,6 +227,32 @@
   font-style: italic;
 }
 
+/* Viewed status column */
+.viewed-cell {
+  text-align: center;
+  width: 60px;
+}
+
+.viewed-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewed-icon.viewed {
+  color: #4a7c59;
+}
+
+.viewed-icon.not-viewed {
+  color: #9ca3af;
+}
+
+/* Unviewed rows - bold text */
+.row-unviewed td {
+  font-weight: 600;
+  color: #111827;
+}
+
 .table-footer {
   padding: 0.875rem 1rem;
   background-color: #f9fafb;
@@ -389,8 +415,8 @@
 
 /* Footer */
 .app-footer {
-  background-color: #1f2937;
-  color: #9ca3af;
+  background-color: #d3d7c4;
+  color: #000000;
   padding: 1rem 2rem;
   text-align: center;
   font-size: 0.875rem;

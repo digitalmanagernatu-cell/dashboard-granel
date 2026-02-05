@@ -4,9 +4,31 @@ interface TransferTableProps {
   transfers: TransferReceipt[];
   onViewReceipt: (transfer: TransferReceipt) => void;
   loading: boolean;
+  viewedReceipts: Set<string>;
+  getTransferId: (transfer: TransferReceipt) => string;
 }
 
-export function TransferTable({ transfers, onViewReceipt, loading }: TransferTableProps) {
+// Eye icon for viewed items
+function EyeIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+// Eye with slash icon for not viewed items
+function EyeOffIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  );
+}
+
+export function TransferTable({ transfers, onViewReceipt, loading, viewedReceipts, getTransferId }: TransferTableProps) {
   if (loading) {
     return (
       <div className="table-container">
@@ -28,6 +50,7 @@ export function TransferTable({ transfers, onViewReceipt, loading }: TransferTab
       <table className="transfers-table">
         <thead>
           <tr>
+            <th>Visto</th>
             <th>Nº Cliente</th>
             <th>Nombre Cliente</th>
             <th>Nº Pedido</th>
@@ -36,27 +59,44 @@ export function TransferTable({ transfers, onViewReceipt, loading }: TransferTab
           </tr>
         </thead>
         <tbody>
-          {transfers.map((transfer, index) => (
-            <tr key={`${transfer.clientNumber}-${transfer.orderNumber}-${index}`}>
-              <td>{transfer.clientNumber}</td>
-              <td>{transfer.clientName}</td>
-              <td>{transfer.orderNumber}</td>
-              <td>{transfer.submissionDate}</td>
-              <td>
-                {transfer.receiptUrl ? (
-                  <button
-                    className="btn-view-receipt"
-                    onClick={() => onViewReceipt(transfer)}
-                    title="Ver justificante"
-                  >
-                    Ver Justificante
-                  </button>
-                ) : (
-                  <span className="no-receipt">Sin justificante</span>
-                )}
-              </td>
-            </tr>
-          ))}
+          {transfers.map((transfer, index) => {
+            const isViewed = viewedReceipts.has(getTransferId(transfer));
+            return (
+              <tr
+                key={`${transfer.clientNumber}-${transfer.orderNumber}-${index}`}
+                className={isViewed ? '' : 'row-unviewed'}
+              >
+                <td className="viewed-cell">
+                  {isViewed ? (
+                    <span className="viewed-icon viewed" title="Visto">
+                      <EyeIcon />
+                    </span>
+                  ) : (
+                    <span className="viewed-icon not-viewed" title="Sin ver">
+                      <EyeOffIcon />
+                    </span>
+                  )}
+                </td>
+                <td>{transfer.clientNumber}</td>
+                <td>{transfer.clientName}</td>
+                <td>{transfer.orderNumber}</td>
+                <td>{transfer.submissionDate}</td>
+                <td>
+                  {transfer.receiptUrl ? (
+                    <button
+                      className="btn-view-receipt"
+                      onClick={() => onViewReceipt(transfer)}
+                      title="Ver justificante"
+                    >
+                      Ver Justificante
+                    </button>
+                  ) : (
+                    <span className="no-receipt">Sin justificante</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <div className="table-footer">
