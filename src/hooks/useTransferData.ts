@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { TransferReceipt, TransferFilters } from '../types/transfer';
 import { fetchTransferReceipts, parseDate } from '../services/googleSheets';
-import { subDays, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 
 interface UseTransferDataOptions {
   spreadsheetId: string;
@@ -13,8 +13,8 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<TransferFilters>({
-    startDate: subDays(new Date(), 7),
-    endDate: new Date(),
+    startDate: null,
+    endDate: null,
     clientSearch: '',
     orderSearch: '',
   });
@@ -43,7 +43,7 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
   }, [spreadsheetId, sheetGid]);
 
   const filteredTransfers = useMemo(() => {
-    return allTransfers.filter((transfer) => {
+    const filtered = allTransfers.filter((transfer) => {
       // Filter by date range
       if (filters.startDate || filters.endDate) {
         const transferDate = parseDate(transfer.submissionDate);
@@ -77,6 +77,16 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
       }
 
       return true;
+    });
+
+    // Sort by date descending (most recent first)
+    return filtered.sort((a, b) => {
+      const dateA = parseDate(a.submissionDate);
+      const dateB = parseDate(b.submissionDate);
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+      return dateB.getTime() - dateA.getTime();
     });
   }, [allTransfers, filters]);
 
