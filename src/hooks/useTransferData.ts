@@ -43,7 +43,7 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
   }, [spreadsheetId, sheetGid]);
 
   const filteredTransfers = useMemo(() => {
-    return allTransfers.filter((transfer) => {
+    const filtered = allTransfers.filter((transfer) => {
       // Filter by date range
       if (filters.startDate || filters.endDate) {
         const transferDate = parseDate(transfer.submissionDate);
@@ -77,6 +77,16 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
       }
 
       return true;
+    });
+
+    // Sort by date descending (most recent first)
+    return filtered.sort((a, b) => {
+      const dateA = parseDate(a.submissionDate);
+      const dateB = parseDate(b.submissionDate);
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+      return dateB.getTime() - dateA.getTime();
     });
   }, [allTransfers, filters]);
 
