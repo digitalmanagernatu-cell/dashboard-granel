@@ -51,6 +51,7 @@ export function TransferTable({ transfers, onViewReceipt, loading, viewedReceipt
         <thead>
           <tr>
             <th>Visto</th>
+            <th>Fuente</th>
             <th>Nº Cliente</th>
             <th>Nombre Cliente</th>
             <th>Nº Pedido</th>
@@ -77,6 +78,7 @@ export function TransferTable({ transfers, onViewReceipt, loading, viewedReceipt
                     </span>
                   )}
                 </td>
+                <td className="source-cell">{transfer.source}</td>
                 <td>{transfer.clientNumber}</td>
                 <td>{transfer.clientName}</td>
                 <td>{transfer.orderNumber}</td>

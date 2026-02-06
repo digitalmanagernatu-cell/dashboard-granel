@@ -1,4 +1,5 @@
 export interface TransferReceipt {
+  source: string;
   clientNumber: string;
   clientName: string;
   orderNumber: string;

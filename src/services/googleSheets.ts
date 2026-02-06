@@ -91,6 +91,7 @@ export async function fetchTransferReceipts(
     }
 
     return {
+      source: getCellValue(cells[5]),
       clientNumber: getCellValue(cells[0]),
       clientName: getCellValue(cells[1]),
       orderNumber: getCellValue(cells[2]),
