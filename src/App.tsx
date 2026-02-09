@@ -60,6 +60,26 @@ function App() {
     setSelectedTransfer(transfer);
   };
 
+  const handleToggleViewed = (transfer: TransferReceipt) => {
+    const id = getTransferId(transfer);
+    setViewedReceipts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleClientClick = (clientSearch: string) => {
+    setFilters(prev => ({
+      ...prev,
+      clientSearch,
+    }));
+  };
+
   const handleCloseModal = () => {
     setSelectedTransfer(null);
   };
@@ -97,6 +117,8 @@ function App() {
         <TransferTable
           transfers={transfers}
           onViewReceipt={handleViewReceipt}
+          onToggleViewed={handleToggleViewed}
+          onClientClick={handleClientClick}
           loading={loading}
           viewedReceipts={viewedReceipts}
           getTransferId={getTransferId}

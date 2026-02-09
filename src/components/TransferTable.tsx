@@ -3,6 +3,8 @@ import type { TransferReceipt } from '../types/transfer';
 interface TransferTableProps {
   transfers: TransferReceipt[];
   onViewReceipt: (transfer: TransferReceipt) => void;
+  onToggleViewed: (transfer: TransferReceipt) => void;
+  onClientClick: (clientSearch: string) => void;
   loading: boolean;
   viewedReceipts: Set<string>;
   getTransferId: (transfer: TransferReceipt) => string;
@@ -28,7 +30,7 @@ function EyeOffIcon() {
   );
 }
 
-export function TransferTable({ transfers, onViewReceipt, loading, viewedReceipts, getTransferId }: TransferTableProps) {
+export function TransferTable({ transfers, onViewReceipt, onToggleViewed, onClientClick, loading, viewedReceipts, getTransferId }: TransferTableProps) {
   if (loading) {
     return (
       <div className="table-container">
@@ -68,19 +70,33 @@ export function TransferTable({ transfers, onViewReceipt, loading, viewedReceipt
                 className={isViewed ? '' : 'row-unviewed'}
               >
                 <td className="viewed-cell">
-                  {isViewed ? (
-                    <span className="viewed-icon viewed" title="Visto">
-                      <EyeIcon />
-                    </span>
-                  ) : (
-                    <span className="viewed-icon not-viewed" title="Sin ver">
-                      <EyeOffIcon />
-                    </span>
-                  )}
+                  <button
+                    className={`viewed-icon-btn ${isViewed ? 'viewed' : 'not-viewed'}`}
+                    onClick={() => onToggleViewed(transfer)}
+                    title={isViewed ? 'Marcar como no visto' : 'Marcar como visto'}
+                  >
+                    {isViewed ? <EyeIcon /> : <EyeOffIcon />}
+                  </button>
                 </td>
                 <td className="source-cell">{transfer.source}</td>
-                <td>{transfer.clientNumber}</td>
-                <td>{transfer.clientName}</td>
+                <td>
+                  <button
+                    className="client-link"
+                    onClick={() => onClientClick(transfer.clientNumber)}
+                    title="Filtrar por este cliente"
+                  >
+                    {transfer.clientNumber}
+                  </button>
+                </td>
+                <td>
+                  <button
+                    className="client-link"
+                    onClick={() => onClientClick(transfer.clientName)}
+                    title="Filtrar por este cliente"
+                  >
+                    {transfer.clientName}
+                  </button>
+                </td>
                 <td>{transfer.orderNumber}</td>
                 <td>{transfer.submissionDate}</td>
                 <td>
