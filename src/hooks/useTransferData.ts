@@ -1,7 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { TransferReceipt, TransferFilters } from '../types/transfer';
 import { fetchTransferReceipts, parseDate } from '../services/googleSheets';
 import { isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+
+// Auto-refresh interval in milliseconds (30 seconds)
+const AUTO_REFRESH_INTERVAL = 30000;
 
 interface UseTransferDataOptions {
   spreadsheetId: string;
@@ -20,6 +23,21 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
     sourceFilter: '',
   });
 
+  // Silent refresh (doesn't show loading state)
+  const silentRefresh = useCallback(async () => {
+    if (!spreadsheetId) return;
+
+    try {
+      const data = await fetchTransferReceipts(spreadsheetId, sheetGid);
+      setAllTransfers(data);
+      setError(null);
+    } catch (err) {
+      // Don't update error on silent refresh to avoid disrupting user
+      console.error('Auto-refresh failed:', err);
+    }
+  }, [spreadsheetId, sheetGid]);
+
+  // Initial load
   useEffect(() => {
     async function loadData() {
       if (!spreadsheetId) {
@@ -42,6 +60,13 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
 
     loadData();
   }, [spreadsheetId, sheetGid]);
+
+  // Auto-refresh interval
+  useEffect(() => {
+    const intervalId = setInterval(silentRefresh, AUTO_REFRESH_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, [silentRefresh]);
 
   const filteredTransfers = useMemo(() => {
     const filtered = allTransfers.filter((transfer) => {

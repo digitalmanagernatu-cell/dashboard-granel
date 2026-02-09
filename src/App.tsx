@@ -34,6 +34,7 @@ function App() {
 
   const {
     transfers,
+    allTransfers,
     loading,
     error,
     filters,
@@ -44,11 +45,12 @@ function App() {
     sheetGid: SHEET_GID,
   });
 
+  // Update timestamp when data changes (including auto-refresh)
   useEffect(() => {
-    if (!loading && !error) {
+    if (allTransfers.length > 0) {
       setLastUpdate(new Date());
     }
-  }, [loading, error]);
+  }, [allTransfers]);
 
   useEffect(() => {
     localStorage.setItem(VIEWED_STORAGE_KEY, JSON.stringify([...viewedReceipts]));
