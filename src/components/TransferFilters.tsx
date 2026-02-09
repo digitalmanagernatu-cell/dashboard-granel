@@ -121,7 +121,7 @@ export function TransferFilters({ filters, onFiltersChange }: TransferFiltersPro
 
         <div className="filter-group filter-actions">
           <button type="button" onClick={handleReset} className="btn-reset">
-            Restablecer (Últimos 7 días)
+            Limpiar filtros
           </button>
         </div>
       </div>
