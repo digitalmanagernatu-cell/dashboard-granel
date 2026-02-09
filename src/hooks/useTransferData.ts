@@ -17,6 +17,7 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
     endDate: null,
     clientSearch: '',
     orderSearch: '',
+    sourceFilter: '',
   });
 
   useEffect(() => {
@@ -72,6 +73,13 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
       if (filters.orderSearch) {
         const searchLower = filters.orderSearch.toLowerCase();
         if (!transfer.orderNumber.toLowerCase().includes(searchLower)) {
+          return false;
+        }
+      }
+
+      // Filter by source
+      if (filters.sourceFilter) {
+        if (transfer.source.toLowerCase() !== filters.sourceFilter.toLowerCase()) {
           return false;
         }
       }

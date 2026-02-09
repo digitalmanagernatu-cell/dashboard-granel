@@ -12,4 +12,5 @@ export interface TransferFilters {
   endDate: Date | null;
   clientSearch: string;
   orderSearch: string;
+  sourceFilter: string;
 }

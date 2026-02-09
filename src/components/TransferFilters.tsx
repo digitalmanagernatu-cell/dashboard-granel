@@ -37,12 +37,20 @@ export function TransferFilters({ filters, onFiltersChange }: TransferFiltersPro
     });
   };
 
+  const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onFiltersChange({
+      ...filters,
+      sourceFilter: e.target.value,
+    });
+  };
+
   const handleReset = () => {
     onFiltersChange({
       startDate: subDays(new Date(), 7),
       endDate: new Date(),
       clientSearch: '',
       orderSearch: '',
+      sourceFilter: '',
     });
   };
 
@@ -95,6 +103,20 @@ export function TransferFilters({ filters, onFiltersChange }: TransferFiltersPro
             value={filters.orderSearch}
             onChange={handleOrderChange}
           />
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="sourceFilter">Fuente</label>
+          <select
+            id="sourceFilter"
+            value={filters.sourceFilter}
+            onChange={handleSourceChange}
+          >
+            <option value="">Todas</option>
+            <option value="formulario">Formulario</option>
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
         </div>
 
         <div className="filter-group filter-actions">
