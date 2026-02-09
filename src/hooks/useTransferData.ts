@@ -112,14 +112,20 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
       return true;
     });
 
-    // Sort by date descending (most recent first)
+    // Sort by date descending (most recent first), then by row index descending
+    // (newer rows in the sheet have higher index)
     return filtered.sort((a, b) => {
       const dateA = parseDate(a.submissionDate);
       const dateB = parseDate(b.submissionDate);
-      if (!dateA && !dateB) return 0;
+      if (!dateA && !dateB) return b.rowIndex - a.rowIndex;
       if (!dateA) return 1;
       if (!dateB) return -1;
-      return dateB.getTime() - dateA.getTime();
+      const dateComparison = dateB.getTime() - dateA.getTime();
+      // If same date, sort by row index (higher = more recent)
+      if (dateComparison === 0) {
+        return b.rowIndex - a.rowIndex;
+      }
+      return dateComparison;
     });
   }, [allTransfers, filters]);
 
