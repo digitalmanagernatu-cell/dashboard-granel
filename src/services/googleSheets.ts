@@ -79,7 +79,7 @@ export async function fetchTransferReceipts(
     return '';
   };
 
-  return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }) => {
+  return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
     const cells = row.c || [];
 
     // For dates, always format to DD/MM/YYYY regardless of source format
@@ -97,6 +97,7 @@ export async function fetchTransferReceipts(
       orderNumber: getCellValue(cells[2]),
       submissionDate,
       receiptUrl: getCellValue(cells[4]),
+      rowIndex: index, // Track original position for sorting
     };
   });
 }

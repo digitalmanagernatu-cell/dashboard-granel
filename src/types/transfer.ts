@@ -5,6 +5,7 @@ export interface TransferReceipt {
   orderNumber: string;
   submissionDate: string;
   receiptUrl: string;
+  rowIndex: number; // Original row position in the sheet (for sorting)
 }
 
 export interface TransferFilters {
