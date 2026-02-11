@@ -55,13 +55,13 @@ export function IncidentCharts({ incidents }: IncidentChartsProps) {
   // Calculate donut chart percentages
   const openPercent = total > 0 ? (open / total) * 100 : 0;
 
-  // CSS conic-gradient for donut chart
+  // CSS conic-gradient for donut chart (Abierta: #e2a29a, Cerrada: #d3d7c4)
   const donutGradient = total > 0
-    ? `conic-gradient(#ff6b6b 0% ${openPercent}%, #4ecdc4 ${openPercent}% 100%)`
+    ? `conic-gradient(#e2a29a 0% ${openPercent}%, #d3d7c4 ${openPercent}% 100%)`
     : 'conic-gradient(#e0e0e0 0% 100%)';
 
   // Color palette for bar chart
-  const barColors = ['#4ecdc4', '#2d3748', '#ff6b6b', '#ffd93d', '#6c5ce7', '#a8e6cf'];
+  const barColors = ['#dad7d1', '#3e3f3e', '#dcd5be', '#e4bca5'];
 
   return (
     <div className="incident-charts">
@@ -112,11 +112,11 @@ export function IncidentCharts({ incidents }: IncidentChartsProps) {
             </div>
             <div className="donut-legend">
               <div className="legend-item">
-                <span className="legend-color" style={{ backgroundColor: '#4ecdc4' }}></span>
+                <span className="legend-color" style={{ backgroundColor: '#d3d7c4' }}></span>
                 <span>Cerrada: {closed}</span>
               </div>
               <div className="legend-item">
-                <span className="legend-color" style={{ backgroundColor: '#ff6b6b' }}></span>
+                <span className="legend-color" style={{ backgroundColor: '#e2a29a' }}></span>
                 <span>Abierta: {open}</span>
               </div>
             </div>
