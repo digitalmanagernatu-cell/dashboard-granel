@@ -41,8 +41,35 @@
   font-size: 0.9rem;
 }
 
-.header-actions {
+.header-nav {
+  display: flex;
+  gap: 0.5rem;
   margin-left: auto;
+}
+
+.nav-btn {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-btn.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.header-actions {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -294,6 +321,13 @@
 
 .viewed-icon-btn.not-viewed {
   color: #9ca3af;
+}
+
+/* Incident details column */
+.incident-details-cell {
+  max-width: 300px;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 /* Clickable client links */
