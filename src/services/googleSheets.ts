@@ -1,4 +1,4 @@
-import type { TransferReceipt } from '../types/transfer';
+import type { TransferReceipt, Incident } from '../types/transfer';
 
 /**
  * Formats a date string to DD/MM/YYYY format
@@ -98,6 +98,68 @@ export async function fetchTransferReceipts(
       submissionDate,
       receiptUrl: getCellValue(cells[4]),
       rowIndex: index, // Track original position for sorting
+    };
+  });
+}
+
+/**
+ * Fetches incidents from a public Google Sheet
+ * Uses the public visualization endpoint (no API key required)
+ * Column mapping: A(skip), B(Fecha), C(Fuente), D(Código Cliente), E(Nombre), F(Nº Pedido), G(Detalle)
+ */
+export async function fetchIncidents(
+  spreadsheetId: string,
+  sheetGid: string = '0'
+): Promise<Incident[]> {
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&gid=${sheetGid}`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Error al cargar datos: ${response.statusText}`);
+  }
+
+  const text = await response.text();
+
+  const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?$/);
+  if (!jsonMatch) {
+    throw new Error('Formato de respuesta inválido');
+  }
+
+  const data = JSON.parse(jsonMatch[1]);
+
+  if (!data.table || !data.table.rows) {
+    return [];
+  }
+
+  const rows = data.table.rows;
+
+  const getCellValue = (cell: { v?: unknown; f?: string } | null | undefined): string => {
+    if (cell === null || cell === undefined) return '';
+    if (typeof cell.f === 'string' && cell.f !== '') return cell.f;
+    if (cell.v !== null && cell.v !== undefined) return String(cell.v);
+    return '';
+  };
+
+  return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
+    const cells = row.c || [];
+
+    // Column B (index 1) is date
+    const dateCell = cells[1];
+    let incidentDate = '';
+    if (dateCell) {
+      const rawDate = getCellValue(dateCell);
+      incidentDate = formatToSpanishDate(rawDate);
+    }
+
+    return {
+      source: getCellValue(cells[2]),        // Column C: Fuente
+      clientNumber: getCellValue(cells[3]),  // Column D: Código Cliente
+      clientName: getCellValue(cells[4]),    // Column E: Nombre Cliente
+      orderNumber: getCellValue(cells[5]),   // Column F: Nº Pedido
+      incidentDate,                          // Column B: Fecha
+      incidentDetails: getCellValue(cells[6]), // Column G: Detalle Incidencia
+      rowIndex: index,
     };
   });
 }

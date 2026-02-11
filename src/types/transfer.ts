@@ -8,6 +8,16 @@ export interface TransferReceipt {
   rowIndex: number; // Original row position in the sheet (for sorting)
 }
 
+export interface Incident {
+  source: string;
+  clientNumber: string;
+  clientName: string;
+  orderNumber: string;
+  incidentDate: string;
+  incidentDetails: string;
+  rowIndex: number; // Original row position in the sheet (for sorting)
+}
+
 export interface TransferFilters {
   startDate: Date | null;
   endDate: Date | null;
@@ -15,3 +25,5 @@ export interface TransferFilters {
   orderSearch: string;
   sourceFilter: string;
 }
+
+export type DashboardView = 'transfers' | 'incidents';
