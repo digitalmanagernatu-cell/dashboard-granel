@@ -1,5 +1,5 @@
 import type { IncidentFilters as FilterType, Incident } from '../types/transfer';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 
 interface IncidentFiltersProps {
   filters: FilterType;
@@ -27,20 +27,6 @@ export function IncidentFilters({ filters, onFiltersChange, incidents }: Inciden
     });
   };
 
-  const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFiltersChange({
-      ...filters,
-      clientSearch: e.target.value,
-    });
-  };
-
-  const handleOrderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFiltersChange({
-      ...filters,
-      orderSearch: e.target.value,
-    });
-  };
-
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onFiltersChange({
       ...filters,
@@ -57,8 +43,8 @@ export function IncidentFilters({ filters, onFiltersChange, incidents }: Inciden
 
   const handleReset = () => {
     onFiltersChange({
-      startDate: subDays(new Date(), 7),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
       clientSearch: '',
       orderSearch: '',
       incidentTypeFilter: '',
@@ -74,7 +60,7 @@ export function IncidentFilters({ filters, onFiltersChange, incidents }: Inciden
   return (
     <div className="filters-container">
       <h2>Filtros de Incidencias</h2>
-      <div className="filters-grid">
+      <div className="filters-row">
         <div className="filter-group">
           <label htmlFor="startDate">Fecha desde</label>
           <input
@@ -92,28 +78,6 @@ export function IncidentFilters({ filters, onFiltersChange, incidents }: Inciden
             id="endDate"
             value={formatDateForInput(filters.endDate)}
             onChange={handleEndDateChange}
-          />
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="clientSearch">Cliente (Nº o Nombre)</label>
-          <input
-            type="text"
-            id="clientSearch"
-            placeholder="Buscar cliente..."
-            value={filters.clientSearch}
-            onChange={handleClientChange}
-          />
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="orderSearch">Nº Pedido</label>
-          <input
-            type="text"
-            id="orderSearch"
-            placeholder="Buscar pedido..."
-            value={filters.orderSearch}
-            onChange={handleOrderChange}
           />
         </div>
 
