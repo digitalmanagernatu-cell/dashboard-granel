@@ -18,8 +18,7 @@ const INCIDENTS_SPREADSHEET_ID = '1e5B9tG28fE1dzthZlQVTIyvrLMzJSQTVPZpXaOhdYRc';
 const INCIDENTS_SHEET_GID = '0';
 
 // Google Apps Script Web App URL for updating incidents
-// You need to deploy an Apps Script and put the URL here
-const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || '';
+const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzHOM0yB-GvqTsAJdJI0LaiOLOwcozcnG2HHZ_7OvZiemwGphnbLFO7FUsXxrYLiXU5/exec';
 
 const VIEWED_RECEIPTS_KEY = 'granel-viewed-receipts';
 const VIEWED_INCIDENTS_KEY = 'granel-viewed-incidents';
