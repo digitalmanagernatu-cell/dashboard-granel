@@ -5,6 +5,7 @@ import { TransferTable } from './components/TransferTable';
 import { IncidentTable } from './components/IncidentTable';
 import { IncidentCharts } from './components/IncidentCharts';
 import { ReceiptModal } from './components/ReceiptModal';
+import { IncidentDetailModal } from './components/IncidentDetailModal';
 import { useTransferData } from './hooks/useTransferData';
 import { useIncidentData } from './hooks/useIncidentData';
 import { updateIncidentStatus } from './services/googleSheets';
@@ -46,6 +47,7 @@ function App() {
 
   // Modal state
   const [selectedTransfer, setSelectedTransfer] = useState<TransferReceipt | null>(null);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
   // Last update timestamps
   const [lastUpdateTransfers, setLastUpdateTransfers] = useState<Date | null>(null);
@@ -164,6 +166,14 @@ function App() {
     setSelectedTransfer(null);
   };
 
+  const handleViewIncidentDetails = (incident: Incident) => {
+    setSelectedIncident(incident);
+  };
+
+  const handleCloseIncidentModal = () => {
+    setSelectedIncident(null);
+  };
+
   // Get current data based on view
   const lastUpdate = currentView === 'transfers' ? lastUpdateTransfers : lastUpdateIncidents;
   const title = currentView === 'transfers' ? 'Justificantes Transferencias' : 'Incidencias';
@@ -252,6 +262,7 @@ function App() {
               incidents={incidentsData.incidents}
               onToggleViewed={handleToggleViewedIncident}
               onToggleStatus={handleToggleIncidentStatus}
+              onViewDetails={handleViewIncidentDetails}
               onClientClick={handleClientClickIncidents}
               loading={incidentsData.loading}
               viewedIncidents={viewedIncidents}
@@ -262,6 +273,7 @@ function App() {
       </main>
 
       <ReceiptModal transfer={selectedTransfer} onClose={handleCloseModal} />
+      <IncidentDetailModal incident={selectedIncident} onClose={handleCloseIncidentModal} />
 
       <footer className="app-footer">
         <p>Dashboard Granel - by DigitalManager NATU</p>

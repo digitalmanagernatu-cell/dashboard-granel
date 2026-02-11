@@ -4,6 +4,7 @@ interface IncidentTableProps {
   incidents: Incident[];
   onToggleViewed: (incident: Incident) => void;
   onToggleStatus: (incident: Incident) => void;
+  onViewDetails: (incident: Incident) => void;
   onClientClick: (clientSearch: string) => void;
   loading: boolean;
   viewedIncidents: Set<string>;
@@ -30,10 +31,19 @@ function EyeOffIcon() {
   );
 }
 
+// Format date to only show day/month/year (remove time)
+function formatDateOnly(dateString: string): string {
+  if (!dateString) return '';
+  // Already in DD/MM/YYYY format, just ensure no time part
+  const match = dateString.match(/^(\d{1,2}\/\d{1,2}\/\d{4})/);
+  return match ? match[1] : dateString;
+}
+
 export function IncidentTable({
   incidents,
   onToggleViewed,
   onToggleStatus,
+  onViewDetails,
   onClientClick,
   loading,
   viewedIncidents,
@@ -61,13 +71,12 @@ export function IncidentTable({
         <thead>
           <tr>
             <th>Visto</th>
-            <th>Fuente</th>
+            <th>Fecha</th>
             <th>Nº Cliente</th>
             <th>Nombre Cliente</th>
             <th>Nº Pedido</th>
             <th>Tipo Incidencia</th>
-            <th>Detalles Incidencia</th>
-            <th>Fecha</th>
+            <th>Detalles</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -89,7 +98,7 @@ export function IncidentTable({
                     {isViewed ? <EyeIcon /> : <EyeOffIcon />}
                   </button>
                 </td>
-                <td className="source-cell">{incident.source}</td>
+                <td>{formatDateOnly(incident.incidentDate)}</td>
                 <td>
                   <button
                     className="client-link"
@@ -110,8 +119,14 @@ export function IncidentTable({
                 </td>
                 <td>{incident.orderNumber}</td>
                 <td className="incident-type-cell">{incident.incidentType}</td>
-                <td className="incident-details-cell">{incident.incidentDetails}</td>
-                <td>{incident.incidentDate}</td>
+                <td className="details-btn-cell">
+                  <button
+                    className="btn-view-details"
+                    onClick={() => onViewDetails(incident)}
+                  >
+                    Ver Detalles
+                  </button>
+                </td>
                 <td className="status-cell">
                   <button
                     className={`status-btn ${isOpen ? 'status-open' : 'status-closed'}`}

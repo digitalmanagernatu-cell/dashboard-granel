@@ -568,7 +568,108 @@
   background-color: #3dbdb4;
 }
 
-/* Incidents table - narrower columns */
+/* View Details button */
+.details-btn-cell {
+  text-align: center;
+}
+
+.btn-view-details {
+  padding: 0.375rem 0.75rem;
+  background-color: #d3d7c4;
+  color: #000000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-view-details:hover {
+  background-color: #c4c9b4;
+}
+
+/* Incident Detail Modal */
+.incident-detail-modal {
+  max-width: 600px;
+}
+
+.incident-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: white;
+}
+
+.incident-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.detail-value {
+  font-size: 0.9375rem;
+  color: #111827;
+}
+
+.detail-value.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.detail-value.status-badge.status-open {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.detail-value.status-badge.status-closed {
+  background-color: #4ecdc4;
+  color: white;
+}
+
+.incident-details-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+}
+
+.incident-details-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.incident-details-text {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  font-size: 0.9375rem;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  min-height: 80px;
+}
+
+/* Incidents table - column widths */
 .incidents-table th:nth-child(1),
 .incidents-table td:nth-child(1) {
   width: 60px;
@@ -576,11 +677,16 @@
 
 .incidents-table th:nth-child(2),
 .incidents-table td:nth-child(2) {
-  width: 90px;
+  width: 100px;
 }
 
-.incidents-table th:nth-child(9),
-.incidents-table td:nth-child(9) {
+.incidents-table th:nth-child(7),
+.incidents-table td:nth-child(7) {
+  width: 110px;
+}
+
+.incidents-table th:nth-child(8),
+.incidents-table td:nth-child(8) {
   width: 90px;
 }
 
