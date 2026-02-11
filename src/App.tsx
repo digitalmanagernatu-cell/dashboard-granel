@@ -4,6 +4,7 @@ import { IncidentFilters } from './components/IncidentFilters';
 import { TransferTable } from './components/TransferTable';
 import { IncidentTable } from './components/IncidentTable';
 import { IncidentCharts } from './components/IncidentCharts';
+import { IncidentSearchBar } from './components/IncidentSearchBar';
 import { ReceiptModal } from './components/ReceiptModal';
 import { IncidentDetailModal } from './components/IncidentDetailModal';
 import { useTransferData } from './hooks/useTransferData';
@@ -48,6 +49,9 @@ function App() {
   // Modal state
   const [selectedTransfer, setSelectedTransfer] = useState<TransferReceipt | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+
+  // Incident search state
+  const [incidentSearch, setIncidentSearch] = useState('');
 
   // Last update timestamps
   const [lastUpdateTransfers, setLastUpdateTransfers] = useState<Date | null>(null);
@@ -156,10 +160,11 @@ function App() {
   };
 
   const handleClientClickIncidents = (clientSearch: string) => {
-    incidentsData.setFilters(prev => ({
-      ...prev,
-      clientSearch,
-    }));
+    setIncidentSearch(clientSearch);
+  };
+
+  const handleIncidentSearchChange = (value: string) => {
+    setIncidentSearch(value);
   };
 
   const handleCloseModal = () => {
@@ -179,6 +184,17 @@ function App() {
   const title = currentView === 'transfers' ? 'Justificantes Transferencias' : 'Incidencias';
   const currentLoading = currentView === 'transfers' ? transfersData.loading : incidentsData.loading;
   const currentRefresh = currentView === 'transfers' ? transfersData.refresh : incidentsData.refresh;
+
+  // Filter incidents by search term (client number or order number)
+  const filteredIncidents = incidentSearch
+    ? incidentsData.incidents.filter(incident => {
+        const searchLower = incidentSearch.toLowerCase();
+        return (
+          incident.clientNumber.toLowerCase().includes(searchLower) ||
+          incident.orderNumber.toLowerCase().includes(searchLower)
+        );
+      })
+    : incidentsData.incidents;
 
   return (
     <div className="app">
@@ -258,8 +274,13 @@ function App() {
 
             <IncidentCharts incidents={incidentsData.allIncidents} />
 
+            <IncidentSearchBar
+              searchValue={incidentSearch}
+              onSearchChange={handleIncidentSearchChange}
+            />
+
             <IncidentTable
-              incidents={incidentsData.incidents}
+              incidents={filteredIncidents}
               onToggleViewed={handleToggleViewedIncident}
               onToggleStatus={handleToggleIncidentStatus}
               onViewDetails={handleViewIncidentDetails}
