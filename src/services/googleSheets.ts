@@ -105,7 +105,9 @@ export async function fetchTransferReceipts(
 /**
  * Fetches incidents from a public Google Sheet
  * Uses the public visualization endpoint (no API key required)
- * Column mapping: A(skip), B(Fecha), C(Fuente), D(Código Cliente), E(Nombre), F(Nº Pedido), G(Detalle)
+ * Column mapping:
+ * A(0): Fecha, B(1): Nº Cliente, C(2): Nombre Cliente, D(3): Nº Pedido,
+ * E(4): Tipo Incidencia, F(5): Detalles, G(6): Fuente, H(7): Estado
  */
 export async function fetchIncidents(
   spreadsheetId: string,
@@ -144,8 +146,8 @@ export async function fetchIncidents(
   return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
     const cells = row.c || [];
 
-    // Column B (index 1) is date
-    const dateCell = cells[1];
+    // Column A (index 0) is date
+    const dateCell = cells[0];
     let incidentDate = '';
     if (dateCell) {
       const rawDate = getCellValue(dateCell);
@@ -153,15 +155,49 @@ export async function fetchIncidents(
     }
 
     return {
-      source: getCellValue(cells[2]),        // Column C: Fuente
-      clientNumber: getCellValue(cells[3]),  // Column D: Código Cliente
-      clientName: getCellValue(cells[4]),    // Column E: Nombre Cliente
-      orderNumber: getCellValue(cells[5]),   // Column F: Nº Pedido
-      incidentDate,                          // Column B: Fecha
-      incidentDetails: getCellValue(cells[6]), // Column G: Detalle Incidencia
+      source: getCellValue(cells[6]),          // Column G: Fuente
+      clientNumber: getCellValue(cells[1]),    // Column B: Nº Cliente
+      clientName: getCellValue(cells[2]),      // Column C: Nombre Cliente
+      orderNumber: getCellValue(cells[3]),     // Column D: Nº Pedido
+      incidentType: getCellValue(cells[4]),    // Column E: Tipo Incidencia
+      incidentDetails: getCellValue(cells[5]), // Column F: Detalles Incidencia
+      incidentDate,                            // Column A: Fecha
+      status: getCellValue(cells[7]) || 'Abierta', // Column H: Estado (default Abierta)
       rowIndex: index,
     };
   });
+}
+
+/**
+ * Updates the status of an incident in Google Sheets
+ * Note: This requires the sheet to be set up with Apps Script web app
+ */
+export async function updateIncidentStatus(
+  webAppUrl: string,
+  rowIndex: number,
+  newStatus: string
+): Promise<boolean> {
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'updateStatus',
+        row: rowIndex + 2, // +2 because: +1 for 0-index, +1 for header row
+        status: newStatus,
+      }),
+    });
+
+    // With no-cors mode, we can't read the response
+    // We assume success if no error was thrown
+    return true;
+  } catch (error) {
+    console.error('Error updating incident status:', error);
+    return false;
+  }
 }
 
 export function parseDate(dateString: string): Date | null {

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { TransferFilters } from './components/TransferFilters';
+import { IncidentFilters } from './components/IncidentFilters';
 import { TransferTable } from './components/TransferTable';
 import { IncidentTable } from './components/IncidentTable';
+import { IncidentCharts } from './components/IncidentCharts';
 import { ReceiptModal } from './components/ReceiptModal';
 import { useTransferData } from './hooks/useTransferData';
 import { useIncidentData } from './hooks/useIncidentData';
+import { updateIncidentStatus } from './services/googleSheets';
 import type { TransferReceipt, Incident, DashboardView } from './types/transfer';
 import './App.css';
 
@@ -13,6 +16,10 @@ const TRANSFERS_SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SPREADSHEET_ID || '
 const TRANSFERS_SHEET_GID = import.meta.env.VITE_SHEET_GID || '0';
 const INCIDENTS_SPREADSHEET_ID = '1e5B9tG28fE1dzthZlQVTIyvrLMzJSQTVPZpXaOhdYRc';
 const INCIDENTS_SHEET_GID = '0';
+
+// Google Apps Script Web App URL for updating incidents
+// You need to deploy an Apps Script and put the URL here
+const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || '';
 
 const VIEWED_RECEIPTS_KEY = 'granel-viewed-receipts';
 const VIEWED_INCIDENTS_KEY = 'granel-viewed-incidents';
@@ -130,6 +137,23 @@ function App() {
     });
   };
 
+  const handleToggleIncidentStatus = async (incident: Incident) => {
+    const newStatus = incident.status.toLowerCase() === 'abierta' ? 'Cerrada' : 'Abierta';
+
+    // Optimistic update - update UI immediately
+    incidentsData.updateLocalStatus(incident.rowIndex, newStatus);
+
+    // Try to update the sheet if web app URL is configured
+    if (INCIDENTS_WEB_APP_URL) {
+      const success = await updateIncidentStatus(INCIDENTS_WEB_APP_URL, incident.rowIndex, newStatus);
+      if (!success) {
+        // Revert on failure
+        incidentsData.updateLocalStatus(incident.rowIndex, incident.status);
+        console.error('Failed to update status in sheet');
+      }
+    }
+  };
+
   const handleClientClickIncidents = (clientSearch: string) => {
     incidentsData.setFilters(prev => ({
       ...prev,
@@ -142,9 +166,10 @@ function App() {
   };
 
   // Get current data based on view
-  const currentData = currentView === 'transfers' ? transfersData : incidentsData;
   const lastUpdate = currentView === 'transfers' ? lastUpdateTransfers : lastUpdateIncidents;
   const title = currentView === 'transfers' ? 'Justificantes Transferencias' : 'Incidencias';
+  const currentLoading = currentView === 'transfers' ? transfersData.loading : incidentsData.loading;
+  const currentRefresh = currentView === 'transfers' ? transfersData.refresh : incidentsData.refresh;
 
   return (
     <div className="app">
@@ -176,44 +201,64 @@ function App() {
               Última actualización: {formatLastUpdate(lastUpdate)}
             </span>
           )}
-          <button onClick={currentData.refresh} className="btn-refresh" disabled={currentData.loading}>
-            {currentData.loading ? 'Actualizando...' : 'Actualizar datos'}
+          <button onClick={currentRefresh} className="btn-refresh" disabled={currentLoading}>
+            {currentLoading ? 'Actualizando...' : 'Actualizar datos'}
           </button>
         </div>
       </header>
 
       <main className="app-main">
-        <TransferFilters
-          filters={currentData.filters}
-          onFiltersChange={currentData.setFilters}
-        />
-
-        {currentData.error && (
-          <div className="error-message">
-            <strong>Error:</strong> {currentData.error}
-            <p>Asegúrate de que el Google Sheet sea público (cualquiera con el enlace puede ver).</p>
-          </div>
-        )}
-
         {currentView === 'transfers' ? (
-          <TransferTable
-            transfers={transfersData.transfers}
-            onViewReceipt={handleViewReceipt}
-            onToggleViewed={handleToggleViewedTransfer}
-            onClientClick={handleClientClickTransfers}
-            loading={transfersData.loading}
-            viewedReceipts={viewedReceipts}
-            getTransferId={getTransferId}
-          />
+          <>
+            <TransferFilters
+              filters={transfersData.filters}
+              onFiltersChange={transfersData.setFilters}
+            />
+
+            {transfersData.error && (
+              <div className="error-message">
+                <strong>Error:</strong> {transfersData.error}
+                <p>Asegúrate de que el Google Sheet sea público (cualquiera con el enlace puede ver).</p>
+              </div>
+            )}
+
+            <TransferTable
+              transfers={transfersData.transfers}
+              onViewReceipt={handleViewReceipt}
+              onToggleViewed={handleToggleViewedTransfer}
+              onClientClick={handleClientClickTransfers}
+              loading={transfersData.loading}
+              viewedReceipts={viewedReceipts}
+              getTransferId={getTransferId}
+            />
+          </>
         ) : (
-          <IncidentTable
-            incidents={incidentsData.incidents}
-            onToggleViewed={handleToggleViewedIncident}
-            onClientClick={handleClientClickIncidents}
-            loading={incidentsData.loading}
-            viewedIncidents={viewedIncidents}
-            getIncidentId={getIncidentId}
-          />
+          <>
+            <IncidentFilters
+              filters={incidentsData.filters}
+              onFiltersChange={incidentsData.setFilters}
+              incidents={incidentsData.allIncidents}
+            />
+
+            {incidentsData.error && (
+              <div className="error-message">
+                <strong>Error:</strong> {incidentsData.error}
+                <p>Asegúrate de que el Google Sheet sea público (cualquiera con el enlace puede ver).</p>
+              </div>
+            )}
+
+            <IncidentCharts incidents={incidentsData.allIncidents} />
+
+            <IncidentTable
+              incidents={incidentsData.incidents}
+              onToggleViewed={handleToggleViewedIncident}
+              onToggleStatus={handleToggleIncidentStatus}
+              onClientClick={handleClientClickIncidents}
+              loading={incidentsData.loading}
+              viewedIncidents={viewedIncidents}
+              getIncidentId={getIncidentId}
+            />
+          </>
         )}
       </main>
 

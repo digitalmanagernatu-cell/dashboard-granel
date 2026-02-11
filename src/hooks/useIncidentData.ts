@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import type { Incident, TransferFilters } from '../types/transfer';
+import type { Incident, IncidentFilters } from '../types/transfer';
 import { fetchIncidents, parseDate } from '../services/googleSheets';
 import { isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 
@@ -15,12 +15,13 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
   const [allIncidents, setAllIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<TransferFilters>({
+  const [filters, setFilters] = useState<IncidentFilters>({
     startDate: null,
     endDate: null,
     clientSearch: '',
     orderSearch: '',
-    sourceFilter: '',
+    incidentTypeFilter: '',
+    statusFilter: '',
   });
 
   // Silent refresh (doesn't show loading state)
@@ -67,6 +68,15 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
     return () => clearInterval(intervalId);
   }, [silentRefresh]);
 
+  // Update local incident status (optimistic update)
+  const updateLocalStatus = useCallback((rowIndex: number, newStatus: string) => {
+    setAllIncidents(prev => prev.map(incident =>
+      incident.rowIndex === rowIndex
+        ? { ...incident, status: newStatus }
+        : incident
+    ));
+  }, []);
+
   const filteredIncidents = useMemo(() => {
     const filtered = allIncidents.filter((incident) => {
       // Filter by date range
@@ -101,9 +111,16 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
         }
       }
 
-      // Filter by source
-      if (filters.sourceFilter) {
-        if (incident.source.toLowerCase() !== filters.sourceFilter.toLowerCase()) {
+      // Filter by incident type
+      if (filters.incidentTypeFilter) {
+        if (incident.incidentType.toLowerCase() !== filters.incidentTypeFilter.toLowerCase()) {
+          return false;
+        }
+      }
+
+      // Filter by status
+      if (filters.statusFilter) {
+        if (incident.status.toLowerCase() !== filters.statusFilter.toLowerCase()) {
           return false;
         }
       }
@@ -147,5 +164,6 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
     filters,
     setFilters,
     refresh,
+    updateLocalStatus,
   };
 }

@@ -3,6 +3,7 @@ import type { Incident } from '../types/transfer';
 interface IncidentTableProps {
   incidents: Incident[];
   onToggleViewed: (incident: Incident) => void;
+  onToggleStatus: (incident: Incident) => void;
   onClientClick: (clientSearch: string) => void;
   loading: boolean;
   viewedIncidents: Set<string>;
@@ -29,7 +30,15 @@ function EyeOffIcon() {
   );
 }
 
-export function IncidentTable({ incidents, onToggleViewed, onClientClick, loading, viewedIncidents, getIncidentId }: IncidentTableProps) {
+export function IncidentTable({
+  incidents,
+  onToggleViewed,
+  onToggleStatus,
+  onClientClick,
+  loading,
+  viewedIncidents,
+  getIncidentId
+}: IncidentTableProps) {
   if (loading) {
     return (
       <div className="table-container">
@@ -48,7 +57,7 @@ export function IncidentTable({ incidents, onToggleViewed, onClientClick, loadin
 
   return (
     <div className="table-container">
-      <table className="transfers-table">
+      <table className="transfers-table incidents-table">
         <thead>
           <tr>
             <th>Visto</th>
@@ -56,13 +65,16 @@ export function IncidentTable({ incidents, onToggleViewed, onClientClick, loadin
             <th>Nº Cliente</th>
             <th>Nombre Cliente</th>
             <th>Nº Pedido</th>
-            <th>Fecha</th>
+            <th>Tipo Incidencia</th>
             <th>Detalles Incidencia</th>
+            <th>Fecha</th>
+            <th>Estado</th>
           </tr>
         </thead>
         <tbody>
           {incidents.map((incident, index) => {
             const isViewed = viewedIncidents.has(getIncidentId(incident));
+            const isOpen = incident.status.toLowerCase() === 'abierta';
             return (
               <tr
                 key={`${incident.clientNumber}-${incident.orderNumber}-${index}`}
@@ -97,8 +109,18 @@ export function IncidentTable({ incidents, onToggleViewed, onClientClick, loadin
                   </button>
                 </td>
                 <td>{incident.orderNumber}</td>
-                <td>{incident.incidentDate}</td>
+                <td className="incident-type-cell">{incident.incidentType}</td>
                 <td className="incident-details-cell">{incident.incidentDetails}</td>
+                <td>{incident.incidentDate}</td>
+                <td className="status-cell">
+                  <button
+                    className={`status-btn ${isOpen ? 'status-open' : 'status-closed'}`}
+                    onClick={() => onToggleStatus(incident)}
+                    title={isOpen ? 'Cambiar a Cerrada' : 'Cambiar a Abierta'}
+                  >
+                    {isOpen ? 'Abierta' : 'Cerrada'}
+                  </button>
+                </td>
               </tr>
             );
           })}
