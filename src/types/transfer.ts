@@ -37,4 +37,26 @@ export interface IncidentFilters {
   statusFilter: string;
 }
 
-export type DashboardView = 'transfers' | 'incidents';
+// WhatsApp Log types
+export interface WhatsAppMessage {
+  timestamp: string;
+  phone: string;
+  role: 'user' | 'bot';
+  text: string;
+  rowIndex: number;
+}
+
+export interface WhatsAppConversation {
+  phone: string;
+  messages: WhatsAppMessage[];
+  lastMessageDate: Date;
+  messageCount: number;
+}
+
+export interface WhatsAppFilters {
+  startDate: Date | null;
+  endDate: Date | null;
+  searchTerm: string;
+}
+
+export type DashboardView = 'transfers' | 'incidents' | 'whatsapp';
