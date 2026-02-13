@@ -32,6 +32,7 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
+  color: white;
 }
 
 .app-header .subtitle {
@@ -40,8 +41,48 @@
   font-size: 0.9rem;
 }
 
+.header-nav {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-btn {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-btn.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.last-update {
+  color: white;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
 .btn-refresh {
-  margin-left: auto;
   padding: 0.5rem 1rem;
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
@@ -129,6 +170,22 @@
   align-items: end;
 }
 
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+}
+
+.filters-row .filter-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+.filters-row .filter-actions {
+  flex: 0 0 auto;
+}
+
 .filter-group {
   display: flex;
   flex-direction: column;
@@ -141,7 +198,8 @@
   color: #4b5563;
 }
 
-.filter-group input {
+.filter-group input,
+.filter-group select {
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -149,7 +207,13 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.filter-group input:focus {
+.filter-group select {
+  background-color: white;
+  cursor: pointer;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
   outline: none;
   border-color: #4a7c59;
   box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
@@ -161,17 +225,18 @@
 
 .btn-reset {
   padding: 0.5rem 1rem;
-  background-color: #6b7280;
-  color: white;
+  background-color: #dcd5be;
+  color: #000000;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
+  font-weight: 500;
   transition: background-color 0.2s;
 }
 
 .btn-reset:hover {
-  background-color: #4b5563;
+  background-color: #cec7ac;
 }
 
 /* Error Message */
@@ -220,22 +285,89 @@
 
 .btn-view-receipt {
   padding: 0.375rem 0.75rem;
-  background-color: #4a7c59;
-  color: white;
+  background-color: #d3d7c4;
+  color: #000000;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8125rem;
+  font-weight: 500;
   transition: background-color 0.2s;
 }
 
 .btn-view-receipt:hover {
-  background-color: #3d6549;
+  background-color: #c4c9b4;
 }
 
 .no-receipt {
   color: #9ca3af;
   font-style: italic;
+}
+
+/* Viewed status column */
+.viewed-cell {
+  text-align: center;
+  width: 60px;
+}
+
+/* Source column */
+.source-cell {
+  width: 90px;
+}
+
+/* Eye icon toggle button */
+.viewed-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.viewed-icon-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.viewed-icon-btn.viewed {
+  color: #4a7c59;
+}
+
+.viewed-icon-btn.not-viewed {
+  color: #9ca3af;
+}
+
+/* Incident details column */
+.incident-details-cell {
+  max-width: 300px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Clickable client links */
+.client-link {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: color 0.2s;
+}
+
+.client-link:hover {
+  color: #4a7c59;
+  text-decoration: underline;
+}
+
+/* Unviewed rows - bold text */
+.row-unviewed td {
+  font-weight: 600;
+  color: #111827;
 }
 
 .table-footer {
@@ -400,8 +532,8 @@
 
 /* Footer */
 .app-footer {
-  background-color: #1f2937;
-  color: #9ca3af;
+  background-color: #d3d7c4;
+  color: #000000;
   padding: 1rem 2rem;
   text-align: center;
   font-size: 0.875rem;
@@ -411,12 +543,434 @@
   margin: 0;
 }
 
+/* Incident type column */
+.incident-type-cell {
+  white-space: nowrap;
+}
+
+/* Status button */
+.status-cell {
+  text-align: center;
+}
+
+.status-btn {
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.status-btn:hover {
+  transform: scale(1.02);
+}
+
+.status-btn.status-open {
+  background-color: #e2a29a;
+  color: #000000;
+}
+
+.status-btn.status-open:hover {
+  background-color: #d4948c;
+}
+
+.status-btn.status-closed {
+  background-color: #d3d7c4;
+  color: #000000;
+}
+
+.status-btn.status-closed:hover {
+  background-color: #c4c9b4;
+}
+
+/* View Details button */
+.details-btn-cell {
+  text-align: center;
+}
+
+.btn-view-details {
+  padding: 0.375rem 1.25rem;
+  background-color: #dcd5be;
+  color: #000000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-view-details:hover {
+  background-color: #cec7ac;
+}
+
+/* Incident Detail Modal */
+.incident-detail-modal {
+  max-width: 600px;
+}
+
+.incident-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: white;
+}
+
+.incident-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.detail-value {
+  font-size: 0.9375rem;
+  color: #111827;
+}
+
+.detail-value.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.detail-value.status-badge.status-open {
+  background-color: #e2a29a;
+  color: #000000;
+}
+
+.detail-value.status-badge.status-closed {
+  background-color: #d3d7c4;
+  color: #000000;
+}
+
+.incident-details-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+}
+
+.incident-details-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.incident-details-text {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  font-size: 0.9375rem;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  min-height: 80px;
+}
+
+/* Search Bar */
+.search-bar-container {
+  margin-bottom: 1rem;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  gap: 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input-wrapper:focus-within {
+  border-color: #4a7c59;
+  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
+}
+
+.search-icon {
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.9375rem;
+  color: #374151;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.search-clear-btn:hover {
+  color: #4b5563;
+}
+
+/* Incidents table - column widths */
+.incidents-table th:nth-child(1),
+.incidents-table td:nth-child(1) {
+  width: 60px;
+}
+
+.incidents-table th:nth-child(2),
+.incidents-table td:nth-child(2) {
+  width: 100px;
+}
+
+.incidents-table th:nth-child(7),
+.incidents-table td:nth-child(7) {
+  width: 110px;
+}
+
+.incidents-table th:nth-child(8),
+.incidents-table td:nth-child(8) {
+  width: 90px;
+}
+
+/* Incident Charts */
+.incident-charts {
+  margin-bottom: 1.5rem;
+}
+
+/* Summary Cards */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-icon.total {
+  background-color: #dad7d1;
+  color: #3e3f3e;
+}
+
+.summary-icon.open {
+  background-color: #e4bca5;
+  color: #3e3f3e;
+}
+
+.summary-icon.closed {
+  background-color: #dcd5be;
+  color: #3e3f3e;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Charts Row */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.chart-container {
+  background: white;
+  border-radius: 8px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Donut Chart */
+.donut-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.donut-chart {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-hole {
+  width: 100px;
+  height: 100px;
+  background: white;
+  border-radius: 50%;
+}
+
+.donut-legend {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Bar Chart */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bar-label {
+  width: 150px;
+  font-size: 0.8125rem;
+  color: #4b5563;
+  text-align: right;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bar {
+  height: 24px;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  min-width: 4px;
+}
+
+.bar-value {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 24px;
+}
+
+.no-data-chart {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem;
+  font-style: italic;
+}
+
 /* Responsive */
+@media (max-width: 1024px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .app-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
+  }
+
+  .header-nav {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .nav-btn {
+    flex: 1;
   }
 
   .btn-refresh {
@@ -440,5 +994,568 @@
   .transfers-table th,
   .transfers-table td {
     padding: 0.625rem 0.5rem;
+  }
+
+  .bar-label {
+    width: 100px;
+    font-size: 0.75rem;
+  }
+
+  .donut-chart {
+    width: 150px;
+    height: 150px;
+  }
+
+  .donut-hole {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* ========================================
+   WhatsApp Dashboard Styles
+   ======================================== */
+
+.whatsapp-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 180px);
+  min-height: 500px;
+}
+
+.whatsapp-header {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1rem;
+}
+
+.whatsapp-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.whatsapp-title-section h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #3e3f3e;
+}
+
+.whatsapp-title-section .refresh-btn {
+  padding: 0.5rem;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.whatsapp-title-section .refresh-btn:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.whatsapp-title-section .refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* WhatsApp Filters */
+.whatsapp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.whatsapp-search-wrapper {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.whatsapp-search-wrapper .search-icon {
+  position: absolute;
+  left: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+}
+
+.whatsapp-search-input {
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 2.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: #f8f8f8;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.whatsapp-search-input:focus {
+  outline: none;
+  border-color: #25d366;
+  background: white;
+}
+
+.whatsapp-search-wrapper .search-clear-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #888;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.whatsapp-search-wrapper .search-clear-btn:hover {
+  color: #555;
+}
+
+.whatsapp-date-filters {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.whatsapp-date-filters .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.whatsapp-date-filters label {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.whatsapp-date-filters input[type="date"] {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: #f8f8f8;
+}
+
+.whatsapp-date-filters input[type="date"]:focus {
+  outline: none;
+  border-color: #25d366;
+  background: white;
+}
+
+.whatsapp-date-filters .btn-reset {
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.whatsapp-date-filters .btn-reset:hover {
+  background: #e0e0e0;
+}
+
+/* WhatsApp Content - Split View */
+.whatsapp-content {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Conversation List */
+.whatsapp-conversation-list {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.conversation-list-header {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.conversation-list-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #3e3f3e;
+}
+
+.conversation-count {
+  background: #e0e0e0;
+  color: #555;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.conversation-list-items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.no-conversations {
+  padding: 2rem;
+  text-align: center;
+  color: #888;
+}
+
+.conversation-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.conversation-item:hover {
+  background-color: #f8f8f8;
+}
+
+.conversation-item.selected {
+  background-color: #e8f5e9;
+}
+
+.conversation-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.conversation-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.conversation-phone {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #3e3f3e;
+}
+
+.conversation-date {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.conversation-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.conversation-last-message {
+  font-size: 0.8125rem;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.conversation-badge {
+  background: #25d366;
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* WhatsApp Chat */
+.whatsapp-chat {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.whatsapp-chat-empty {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+}
+
+.empty-chat-message {
+  text-align: center;
+}
+
+.empty-chat-message svg {
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.empty-chat-message p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.whatsapp-chat-header {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f8f8f8;
+}
+
+.chat-back-btn {
+  display: none;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  border-radius: 50%;
+}
+
+.chat-back-btn:hover {
+  background: #e0e0e0;
+}
+
+.chat-header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.chat-header-phone {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: #3e3f3e;
+}
+
+.chat-header-count {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.chat-export-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: #dad7d1;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: #3e3f3e;
+  transition: background-color 0.2s;
+}
+
+.chat-export-btn:hover {
+  background: #c9c6c0;
+}
+
+/* Chat Messages */
+.whatsapp-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  background: #ece5dd;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.message-date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.message-date-divider {
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.message-date-divider span {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #555;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  position: relative;
+}
+
+.chat-bubble.user {
+  align-self: flex-end;
+  background: #dcf8c6;
+  border-bottom-right-radius: 2px;
+}
+
+.chat-bubble.bot {
+  align-self: flex-start;
+  background: white;
+  border-bottom-left-radius: 2px;
+}
+
+.bubble-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bubble-content p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #333;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.bubble-time {
+  font-size: 0.6875rem;
+  color: #888;
+  align-self: flex-end;
+}
+
+/* Loading */
+.loading-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #25d366;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dashboard Error */
+.dashboard-error {
+  padding: 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-error p {
+  color: #d32f2f;
+  margin-bottom: 1rem;
+}
+
+.dashboard-error button {
+  padding: 0.5rem 1.5rem;
+  background: #3e3f3e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.dashboard-error button:hover {
+  background: #555;
+}
+
+/* Mobile Responsive for WhatsApp */
+@media (max-width: 768px) {
+  .whatsapp-dashboard {
+    height: auto;
+    min-height: calc(100vh - 200px);
+  }
+
+  .whatsapp-content {
+    grid-template-columns: 1fr;
+  }
+
+  .whatsapp-content.chat-open .whatsapp-conversation-list {
+    display: none;
+  }
+
+  .whatsapp-content:not(.chat-open) .whatsapp-chat,
+  .whatsapp-content:not(.chat-open) .whatsapp-chat-empty {
+    display: none;
+  }
+
+  .whatsapp-content.chat-open .chat-back-btn {
+    display: flex;
+  }
+
+  .whatsapp-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .whatsapp-search-wrapper {
+    min-width: 100%;
+  }
+
+  .whatsapp-date-filters {
+    flex-wrap: wrap;
+  }
+
+  .chat-bubble {
+    max-width: 85%;
   }
 }

@@ -1,12 +1,16 @@
-import type { TransferFilters as FilterType } from '../types/transfer';
-import { format, subDays } from 'date-fns';
+import type { IncidentFilters as FilterType, Incident } from '../types/transfer';
+import { format } from 'date-fns';
 
-interface TransferFiltersProps {
+interface IncidentFiltersProps {
   filters: FilterType;
   onFiltersChange: (filters: FilterType) => void;
+  incidents: Incident[];
 }
 
-export function TransferFilters({ filters, onFiltersChange }: TransferFiltersProps) {
+export function IncidentFilters({ filters, onFiltersChange, incidents }: IncidentFiltersProps) {
+  // Get unique incident types from data
+  const incidentTypes = [...new Set(incidents.map(i => i.incidentType).filter(Boolean))];
+
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     onFiltersChange({
@@ -23,34 +27,28 @@ export function TransferFilters({ filters, onFiltersChange }: TransferFiltersPro
     });
   };
 
-  const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onFiltersChange({
       ...filters,
-      clientSearch: e.target.value,
+      incidentTypeFilter: e.target.value,
     });
   };
 
-  const handleOrderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onFiltersChange({
       ...filters,
-      orderSearch: e.target.value,
-    });
-  };
-
-  const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFiltersChange({
-      ...filters,
-      sourceFilter: e.target.value,
+      statusFilter: e.target.value,
     });
   };
 
   const handleReset = () => {
     onFiltersChange({
-      startDate: subDays(new Date(), 7),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
       clientSearch: '',
       orderSearch: '',
-      sourceFilter: '',
+      incidentTypeFilter: '',
+      statusFilter: '',
     });
   };
 
@@ -61,8 +59,8 @@ export function TransferFilters({ filters, onFiltersChange }: TransferFiltersPro
 
   return (
     <div className="filters-container">
-      <h2>Filtros de Búsqueda</h2>
-      <div className="filters-grid">
+      <h2>Filtros de Incidencias</h2>
+      <div className="filters-row">
         <div className="filter-group">
           <label htmlFor="startDate">Fecha desde</label>
           <input
@@ -84,38 +82,29 @@ export function TransferFilters({ filters, onFiltersChange }: TransferFiltersPro
         </div>
 
         <div className="filter-group">
-          <label htmlFor="clientSearch">Cliente (Nº o Nombre)</label>
-          <input
-            type="text"
-            id="clientSearch"
-            placeholder="Buscar cliente..."
-            value={filters.clientSearch}
-            onChange={handleClientChange}
-          />
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="orderSearch">Nº Pedido</label>
-          <input
-            type="text"
-            id="orderSearch"
-            placeholder="Buscar pedido..."
-            value={filters.orderSearch}
-            onChange={handleOrderChange}
-          />
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="sourceFilter">Fuente</label>
+          <label htmlFor="typeFilter">Tipo Incidencia</label>
           <select
-            id="sourceFilter"
-            value={filters.sourceFilter}
-            onChange={handleSourceChange}
+            id="typeFilter"
+            value={filters.incidentTypeFilter}
+            onChange={handleTypeChange}
           >
-            <option value="">Todas</option>
-            <option value="formulario">Formulario</option>
-            <option value="email">Email</option>
-            <option value="whatsapp">WhatsApp</option>
+            <option value="">Todos</option>
+            {incidentTypes.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="statusFilter">Estado</label>
+          <select
+            id="statusFilter"
+            value={filters.statusFilter}
+            onChange={handleStatusChange}
+          >
+            <option value="">Todos</option>
+            <option value="Abierta">Abiertas</option>
+            <option value="Cerrada">Cerradas</option>
           </select>
         </div>
 

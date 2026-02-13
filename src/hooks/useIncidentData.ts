@@ -1,26 +1,27 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import type { TransferReceipt, TransferFilters } from '../types/transfer';
-import { fetchTransferReceipts, parseDate } from '../services/googleSheets';
+import type { Incident, IncidentFilters } from '../types/transfer';
+import { fetchIncidents, parseDate } from '../services/googleSheets';
 import { isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 
 // Auto-refresh interval in milliseconds (30 seconds)
 const AUTO_REFRESH_INTERVAL = 30000;
 
-interface UseTransferDataOptions {
+interface UseIncidentDataOptions {
   spreadsheetId: string;
   sheetGid?: string;
 }
 
-export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDataOptions) {
-  const [allTransfers, setAllTransfers] = useState<TransferReceipt[]>([]);
+export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDataOptions) {
+  const [allIncidents, setAllIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<TransferFilters>({
+  const [filters, setFilters] = useState<IncidentFilters>({
     startDate: null,
     endDate: null,
     clientSearch: '',
     orderSearch: '',
-    sourceFilter: '',
+    incidentTypeFilter: '',
+    statusFilter: '',
   });
 
   // Silent refresh (doesn't show loading state)
@@ -28,11 +29,10 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
     if (!spreadsheetId) return;
 
     try {
-      const data = await fetchTransferReceipts(spreadsheetId, sheetGid);
-      setAllTransfers(data);
+      const data = await fetchIncidents(spreadsheetId, sheetGid);
+      setAllIncidents(data);
       setError(null);
     } catch (err) {
-      // Don't update error on silent refresh to avoid disrupting user
       console.error('Auto-refresh failed:', err);
     }
   }, [spreadsheetId, sheetGid]);
@@ -49,8 +49,8 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchTransferReceipts(spreadsheetId, sheetGid);
-        setAllTransfers(data);
+        const data = await fetchIncidents(spreadsheetId, sheetGid);
+        setAllIncidents(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al cargar los datos');
       } finally {
@@ -68,16 +68,25 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
     return () => clearInterval(intervalId);
   }, [silentRefresh]);
 
-  const filteredTransfers = useMemo(() => {
-    const filtered = allTransfers.filter((transfer) => {
+  // Update local incident status (optimistic update)
+  const updateLocalStatus = useCallback((rowIndex: number, newStatus: string) => {
+    setAllIncidents(prev => prev.map(incident =>
+      incident.rowIndex === rowIndex
+        ? { ...incident, status: newStatus }
+        : incident
+    ));
+  }, []);
+
+  const filteredIncidents = useMemo(() => {
+    const filtered = allIncidents.filter((incident) => {
       // Filter by date range
       if (filters.startDate || filters.endDate) {
-        const transferDate = parseDate(transfer.submissionDate);
-        if (transferDate) {
+        const incidentDate = parseDate(incident.incidentDate);
+        if (incidentDate) {
           const start = filters.startDate ? startOfDay(filters.startDate) : new Date(0);
           const end = filters.endDate ? endOfDay(filters.endDate) : new Date();
 
-          if (!isWithinInterval(transferDate, { start, end })) {
+          if (!isWithinInterval(incidentDate, { start, end })) {
             return false;
           }
         }
@@ -87,8 +96,8 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
       if (filters.clientSearch) {
         const searchLower = filters.clientSearch.toLowerCase();
         const matchesClient =
-          transfer.clientNumber.toLowerCase().includes(searchLower) ||
-          transfer.clientName.toLowerCase().includes(searchLower);
+          incident.clientNumber.toLowerCase().includes(searchLower) ||
+          incident.clientName.toLowerCase().includes(searchLower);
         if (!matchesClient) {
           return false;
         }
@@ -97,14 +106,21 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
       // Filter by order number
       if (filters.orderSearch) {
         const searchLower = filters.orderSearch.toLowerCase();
-        if (!transfer.orderNumber.toLowerCase().includes(searchLower)) {
+        if (!incident.orderNumber.toLowerCase().includes(searchLower)) {
           return false;
         }
       }
 
-      // Filter by source
-      if (filters.sourceFilter) {
-        if (transfer.source.toLowerCase() !== filters.sourceFilter.toLowerCase()) {
+      // Filter by incident type
+      if (filters.incidentTypeFilter) {
+        if (incident.incidentType.toLowerCase() !== filters.incidentTypeFilter.toLowerCase()) {
+          return false;
+        }
+      }
+
+      // Filter by status
+      if (filters.statusFilter) {
+        if (incident.status.toLowerCase() !== filters.statusFilter.toLowerCase()) {
           return false;
         }
       }
@@ -113,28 +129,26 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
     });
 
     // Sort by date descending (most recent first), then by row index descending
-    // (newer rows in the sheet have higher index)
     return filtered.sort((a, b) => {
-      const dateA = parseDate(a.submissionDate);
-      const dateB = parseDate(b.submissionDate);
+      const dateA = parseDate(a.incidentDate);
+      const dateB = parseDate(b.incidentDate);
       if (!dateA && !dateB) return b.rowIndex - a.rowIndex;
       if (!dateA) return 1;
       if (!dateB) return -1;
       const dateComparison = dateB.getTime() - dateA.getTime();
-      // If same date, sort by row index (higher = more recent)
       if (dateComparison === 0) {
         return b.rowIndex - a.rowIndex;
       }
       return dateComparison;
     });
-  }, [allTransfers, filters]);
+  }, [allIncidents, filters]);
 
   const refresh = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchTransferReceipts(spreadsheetId, sheetGid);
-      setAllTransfers(data);
+      const data = await fetchIncidents(spreadsheetId, sheetGid);
+      setAllIncidents(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar los datos');
     } finally {
@@ -143,12 +157,13 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
   };
 
   return {
-    transfers: filteredTransfers,
-    allTransfers,
+    incidents: filteredIncidents,
+    allIncidents,
     loading,
     error,
     filters,
     setFilters,
     refresh,
+    updateLocalStatus,
   };
 }
