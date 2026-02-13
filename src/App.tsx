@@ -7,6 +7,7 @@ import { IncidentCharts } from './components/IncidentCharts';
 import { IncidentSearchBar } from './components/IncidentSearchBar';
 import { ReceiptModal } from './components/ReceiptModal';
 import { IncidentDetailModal } from './components/IncidentDetailModal';
+import { WhatsAppDashboard } from './components/WhatsAppDashboard';
 import { useTransferData } from './hooks/useTransferData';
 import { useIncidentData } from './hooks/useIncidentData';
 import { updateIncidentStatus } from './services/googleSheets';
@@ -180,10 +181,14 @@ function App() {
   };
 
   // Get current data based on view
-  const lastUpdate = currentView === 'transfers' ? lastUpdateTransfers : lastUpdateIncidents;
-  const title = currentView === 'transfers' ? 'Justificantes Transferencias' : 'Incidencias';
-  const currentLoading = currentView === 'transfers' ? transfersData.loading : incidentsData.loading;
-  const currentRefresh = currentView === 'transfers' ? transfersData.refresh : incidentsData.refresh;
+  const lastUpdate = currentView === 'transfers' ? lastUpdateTransfers :
+                     currentView === 'incidents' ? lastUpdateIncidents : null;
+  const title = currentView === 'transfers' ? 'Justificantes Transferencias' :
+                currentView === 'incidents' ? 'Incidencias' : 'Logs de WhatsApp';
+  const currentLoading = currentView === 'transfers' ? transfersData.loading :
+                         currentView === 'incidents' ? incidentsData.loading : false;
+  const currentRefresh = currentView === 'transfers' ? transfersData.refresh :
+                         currentView === 'incidents' ? incidentsData.refresh : () => {};
 
   // Filter incidents by search term (client number or order number)
   const filteredIncidents = incidentSearch
@@ -218,6 +223,12 @@ function App() {
           >
             Incidencias
           </button>
+          <button
+            className={`nav-btn ${currentView === 'whatsapp' ? 'active' : ''}`}
+            onClick={() => setCurrentView('whatsapp')}
+          >
+            WhatsApp
+          </button>
         </div>
 
         <div className="header-actions">
@@ -233,7 +244,7 @@ function App() {
       </header>
 
       <main className="app-main">
-        {currentView === 'transfers' ? (
+        {currentView === 'transfers' && (
           <>
             <TransferFilters
               filters={transfersData.filters}
@@ -257,7 +268,9 @@ function App() {
               getTransferId={getTransferId}
             />
           </>
-        ) : (
+        )}
+
+        {currentView === 'incidents' && (
           <>
             <IncidentFilters
               filters={incidentsData.filters}
@@ -290,6 +303,10 @@ function App() {
               getIncidentId={getIncidentId}
             />
           </>
+        )}
+
+        {currentView === 'whatsapp' && (
+          <WhatsAppDashboard />
         )}
       </main>
 

@@ -1,4 +1,4 @@
-import type { TransferReceipt, Incident } from '../types/transfer';
+import type { TransferReceipt, Incident, WhatsAppMessage } from '../types/transfer';
 
 /**
  * Formats a date string to DD/MM/YYYY format
@@ -256,4 +256,60 @@ export function convertDriveUrlToViewable(url: string): string {
 
   // If it's already a direct image URL, return as is
   return url;
+}
+
+/**
+ * Fetches WhatsApp conversation logs from a public Google Sheet
+ * Column mapping: A(0): timestamp, B(1): phone, C(2): rol, D(3): texto
+ */
+export async function fetchWhatsAppLogs(
+  spreadsheetId: string,
+  sheetGid: string = '0'
+): Promise<WhatsAppMessage[]> {
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&gid=${sheetGid}`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Error al cargar datos: ${response.statusText}`);
+  }
+
+  const text = await response.text();
+
+  const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?$/);
+  if (!jsonMatch) {
+    throw new Error('Formato de respuesta inválido');
+  }
+
+  const data = JSON.parse(jsonMatch[1]);
+
+  if (!data.table || !data.table.rows) {
+    return [];
+  }
+
+  const rows = data.table.rows;
+
+  const getCellValue = (cell: { v?: unknown; f?: string } | null | undefined): string => {
+    if (cell === null || cell === undefined) return '';
+    if (typeof cell.f === 'string' && cell.f !== '') return cell.f;
+    if (cell.v !== null && cell.v !== undefined) return String(cell.v);
+    return '';
+  };
+
+  return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
+    const cells = row.c || [];
+
+    const timestamp = getCellValue(cells[0]);
+    const phone = getCellValue(cells[1]);
+    const rol = getCellValue(cells[2]).toLowerCase();
+    const text = getCellValue(cells[3]);
+
+    return {
+      timestamp,
+      phone,
+      role: (rol === 'user' || rol === 'usuario') ? 'user' : 'bot',
+      text,
+      rowIndex: index,
+    } as WhatsAppMessage;
+  });
 }
