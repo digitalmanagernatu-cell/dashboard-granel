@@ -22,7 +22,7 @@ const INCIDENTS_SHEET_GID = '0';
 
 // Google Apps Script Web App URLs
 const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzHOM0yB-GvqTsAJdJI0LaiOLOwcozcnG2HHZ_7OvZiemwGphnbLFO7FUsXxrYLiXU5/exec';
-const TRANSFERS_WEB_APP_URL = import.meta.env.VITE_TRANSFERS_WEB_APP_URL || '';
+const TRANSFERS_WEB_APP_URL = import.meta.env.VITE_TRANSFERS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzMfPUnhtSDYXA5We7zK2jrIMBrUOoDbHCi53LY73GOZgPFZhI1On0TVD-HlEJ_0pu3/exec';
 
 const VIEWED_INCIDENTS_KEY = 'granel-viewed-incidents';
 
