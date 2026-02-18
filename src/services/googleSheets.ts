@@ -90,6 +90,9 @@ export async function fetchTransferReceipts(
       submissionDate = formatToSpanishDate(rawDate);
     }
 
+    const viewedRaw = getCellValue(cells[6]).toLowerCase();
+    const viewed = viewedRaw === 'sí' || viewedRaw === 'si' || viewedRaw === 'true';
+
     return {
       source: getCellValue(cells[5]),
       clientNumber: getCellValue(cells[0]),
@@ -97,6 +100,7 @@ export async function fetchTransferReceipts(
       orderNumber: getCellValue(cells[2]),
       submissionDate,
       receiptUrl: getCellValue(cells[4]),
+      viewed,                              // Column G: Visto
       rowIndex: index, // Track original position for sorting
     };
   });
@@ -196,6 +200,36 @@ export async function updateIncidentStatus(
     return true;
   } catch (error) {
     console.error('Error updating incident status:', error);
+    return false;
+  }
+}
+
+/**
+ * Updates the viewed status of a transfer in Google Sheets
+ * Requires an Apps Script web app deployed on the transfers spreadsheet
+ */
+export async function updateTransferViewed(
+  webAppUrl: string,
+  rowIndex: number,
+  viewed: boolean
+): Promise<boolean> {
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'updateViewed',
+        row: rowIndex + 2, // +2: 0-index + header row
+        viewed: viewed ? 'Sí' : 'No',
+      }),
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error updating viewed status:', error);
     return false;
   }
 }
