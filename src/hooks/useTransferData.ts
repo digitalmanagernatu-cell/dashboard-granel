@@ -129,6 +129,15 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
     });
   }, [allTransfers, filters]);
 
+  // Update local viewed state (optimistic update)
+  const updateLocalViewed = useCallback((rowIndex: number, viewed: boolean) => {
+    setAllTransfers(prev => prev.map(transfer =>
+      transfer.rowIndex === rowIndex
+        ? { ...transfer, viewed }
+        : transfer
+    ));
+  }, []);
+
   const refresh = async () => {
     try {
       setLoading(true);
@@ -150,5 +159,6 @@ export function useTransferData({ spreadsheetId, sheetGid = '0' }: UseTransferDa
     filters,
     setFilters,
     refresh,
+    updateLocalViewed,
   };
 }
