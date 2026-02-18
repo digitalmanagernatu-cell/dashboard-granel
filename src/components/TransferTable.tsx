@@ -6,8 +6,6 @@ interface TransferTableProps {
   onToggleViewed: (transfer: TransferReceipt) => void;
   onClientClick: (clientSearch: string) => void;
   loading: boolean;
-  viewedReceipts: Set<string>;
-  getTransferId: (transfer: TransferReceipt) => string;
 }
 
 // Eye icon for viewed items
@@ -30,7 +28,7 @@ function EyeOffIcon() {
   );
 }
 
-export function TransferTable({ transfers, onViewReceipt, onToggleViewed, onClientClick, loading, viewedReceipts, getTransferId }: TransferTableProps) {
+export function TransferTable({ transfers, onViewReceipt, onToggleViewed, onClientClick, loading }: TransferTableProps) {
   if (loading) {
     return (
       <div className="table-container">
@@ -62,20 +60,18 @@ export function TransferTable({ transfers, onViewReceipt, onToggleViewed, onClie
           </tr>
         </thead>
         <tbody>
-          {transfers.map((transfer, index) => {
-            const isViewed = viewedReceipts.has(getTransferId(transfer));
-            return (
+          {transfers.map((transfer, index) => (
               <tr
                 key={`${transfer.clientNumber}-${transfer.orderNumber}-${index}`}
-                className={isViewed ? '' : 'row-unviewed'}
+                className={transfer.viewed ? '' : 'row-unviewed'}
               >
                 <td className="viewed-cell">
                   <button
-                    className={`viewed-icon-btn ${isViewed ? 'viewed' : 'not-viewed'}`}
+                    className={`viewed-icon-btn ${transfer.viewed ? 'viewed' : 'not-viewed'}`}
                     onClick={() => onToggleViewed(transfer)}
-                    title={isViewed ? 'Marcar como no visto' : 'Marcar como visto'}
+                    title={transfer.viewed ? 'Marcar como no visto' : 'Marcar como visto'}
                   >
-                    {isViewed ? <EyeIcon /> : <EyeOffIcon />}
+                    {transfer.viewed ? <EyeIcon /> : <EyeOffIcon />}
                   </button>
                 </td>
                 <td className="source-cell">{transfer.source}</td>
@@ -113,8 +109,7 @@ export function TransferTable({ transfers, onViewReceipt, onToggleViewed, onClie
                   )}
                 </td>
               </tr>
-            );
-          })}
+          ))}
         </tbody>
       </table>
       <div className="table-footer">
