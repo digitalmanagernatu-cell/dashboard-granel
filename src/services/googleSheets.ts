@@ -152,11 +152,15 @@ export async function fetchIncidents(
   return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
     const cells = row.c || [];
 
-    // Column I (index 8): always use raw value (v) to avoid locale/format issues
+    // Column I (index 8): prefer raw value (v), fall back to formatted (f) stripping time
     const dateCell = cells[8];
     let incidentDate = '';
     if (dateCell) {
-      const rawDate = dateCell.v !== null && dateCell.v !== undefined ? String(dateCell.v) : '';
+      let rawDate = dateCell.v !== null && dateCell.v !== undefined ? String(dateCell.v) : '';
+      if (!rawDate && typeof dateCell.f === 'string' && dateCell.f) {
+        // Strip time portion from formatted value (e.g. "15/4/2026 0:00:00" → "15/4/2026")
+        rawDate = dateCell.f.replace(/\s+\d{1,2}:\d{2}(:\d{2})?$/, '').trim();
+      }
       incidentDate = formatToSpanishDate(rawDate);
     }
 
