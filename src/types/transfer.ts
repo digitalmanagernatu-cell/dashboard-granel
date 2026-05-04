@@ -13,11 +13,12 @@ export interface Incident {
   clientNumber: string;     // Column B
   clientName: string;       // Column C
   cif: string;              // Column D
-  invoiceNumber: string;    // Column E
-  incidentType: string;     // Column F
-  incidentDetails: string;  // Column G
-  incidentDate: string;     // Column H
-  status: string;           // Column I (Abierta/Cerrada)
+  comercial: string;        // Column E
+  invoiceNumber: string;    // Column F
+  incidentType: string;     // Column G
+  incidentDetails: string;  // Column H
+  incidentDate: string;     // Column I
+  status: string;           // Column J (Abierta/Cerrada)
   rowIndex: number;         // Original row position in the sheet (for sorting)
 }
 

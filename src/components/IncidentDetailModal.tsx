@@ -59,6 +59,10 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
               <span className="detail-value">{incident.cif}</span>
             </div>
             <div className="detail-row">
+              <span className="detail-label">Comercial:</span>
+              <span className="detail-value">{incident.comercial}</span>
+            </div>
+            <div className="detail-row">
               <span className="detail-label">Nº Factura:</span>
               <span className="detail-value">{incident.invoiceNumber}</span>
             </div>

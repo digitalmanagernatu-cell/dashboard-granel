@@ -76,6 +76,7 @@ export function IncidentTable({
             <th>Cód. Cliente</th>
             <th>Nombre Cliente</th>
             <th>CIF</th>
+            <th>Comercial</th>
             <th>Nº Factura</th>
             <th>Tipo Incidencia</th>
             <th>Detalles</th>
@@ -121,6 +122,7 @@ export function IncidentTable({
                   </button>
                 </td>
                 <td>{incident.cif}</td>
+                <td>{incident.comercial}</td>
                 <td>{incident.invoiceNumber}</td>
                 <td className="incident-type-cell">{incident.incidentType}</td>
                 <td className="details-btn-cell">

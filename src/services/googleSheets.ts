@@ -107,7 +107,8 @@ export async function fetchTransferReceipts(
  * Uses the public visualization endpoint (no API key required)
  * Column mapping:
  * A(0): Nº Incidencia, B(1): Código Cliente, C(2): Nombre Cliente, D(3): CIF,
- * E(4): Nº Factura, F(5): Tipo Incidencia, G(6): Detalle Incidencia, H(7): Fecha, I(8): Estado
+ * E(4): Comercial, F(5): Nº Factura, G(6): Tipo Incidencia, H(7): Detalle Incidencia,
+ * I(8): Fecha, J(9): Estado
  */
 export async function fetchIncidents(
   spreadsheetId: string,
@@ -146,8 +147,8 @@ export async function fetchIncidents(
   return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
     const cells = row.c || [];
 
-    // Column H (index 7) is date
-    const dateCell = cells[7];
+    // Column I (index 8) is date
+    const dateCell = cells[8];
     let incidentDate = '';
     if (dateCell) {
       const rawDate = getCellValue(dateCell);
@@ -159,11 +160,12 @@ export async function fetchIncidents(
       clientNumber: getCellValue(cells[1]),      // Column B: Código Cliente
       clientName: getCellValue(cells[2]),        // Column C: Nombre Cliente
       cif: getCellValue(cells[3]),               // Column D: CIF
-      invoiceNumber: getCellValue(cells[4]),     // Column E: Nº Factura
-      incidentType: getCellValue(cells[5]),      // Column F: Tipo Incidencia
-      incidentDetails: getCellValue(cells[6]),   // Column G: Detalle Incidencia
-      incidentDate,                              // Column H: Fecha
-      status: getCellValue(cells[8]) || 'Abierta', // Column I: Estado (default Abierta)
+      comercial: getCellValue(cells[4]),         // Column E: Comercial
+      invoiceNumber: getCellValue(cells[5]),     // Column F: Nº Factura
+      incidentType: getCellValue(cells[6]),      // Column G: Tipo Incidencia
+      incidentDetails: getCellValue(cells[7]),   // Column H: Detalle Incidencia
+      incidentDate,                              // Column I: Fecha
+      status: getCellValue(cells[9]) || 'Abierta', // Column J: Estado (default Abierta)
       rowIndex: index,
     };
   });
