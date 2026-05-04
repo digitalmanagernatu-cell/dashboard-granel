@@ -7,10 +7,11 @@ import { IncidentCharts } from './components/IncidentCharts';
 import { IncidentSearchBar } from './components/IncidentSearchBar';
 import { ReceiptModal } from './components/ReceiptModal';
 import { IncidentDetailModal } from './components/IncidentDetailModal';
+import { IncidentComentariosModal } from './components/IncidentComentariosModal';
 import { WhatsAppDashboard } from './components/WhatsAppDashboard';
 import { useTransferData } from './hooks/useTransferData';
 import { useIncidentData } from './hooks/useIncidentData';
-import { updateIncidentStatus, updateGestionadaPor, updateTransferViewed } from './services/googleSheets';
+import { updateIncidentStatus, updateGestionadaPor, updateComentarios, updateTransferViewed } from './services/googleSheets';
 import type { TransferReceipt, Incident, DashboardView } from './types/transfer';
 import './App.css';
 
@@ -40,6 +41,7 @@ function App() {
 
   const [selectedTransfer, setSelectedTransfer] = useState<TransferReceipt | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+  const [incidentForComentario, setIncidentForComentario] = useState<Incident | null>(null);
 
   const [incidentSearch, setIncidentSearch] = useState('');
 
@@ -151,6 +153,21 @@ function App() {
 
   const handleCloseIncidentModal = () => {
     setSelectedIncident(null);
+  };
+
+  const handleEditComentarios = (incident: Incident) => {
+    setIncidentForComentario(incident);
+  };
+
+  const handleSaveComentario = async (incident: Incident, comentario: string) => {
+    incidentsData.updateLocalComentarios(incident.rowIndex, comentario);
+    if (INCIDENTS_WEB_APP_URL) {
+      const success = await updateComentarios(INCIDENTS_WEB_APP_URL, incident.rowIndex, comentario);
+      if (!success) {
+        incidentsData.updateLocalComentarios(incident.rowIndex, incident.comentarios);
+        console.error('Failed to update comentarios in sheet');
+      }
+    }
   };
 
   // Get current data based on view
@@ -269,6 +286,7 @@ function App() {
               incidents={filteredIncidents}
               onToggleStatus={handleToggleIncidentStatus}
               onViewDetails={handleViewIncidentDetails}
+              onEditComentarios={handleEditComentarios}
               onClientClick={handleClientClickIncidents}
               onUpdateGestionadaPor={handleUpdateGestionadaPor}
               loading={incidentsData.loading}
@@ -283,6 +301,11 @@ function App() {
 
       <ReceiptModal transfer={selectedTransfer} onClose={handleCloseModal} />
       <IncidentDetailModal incident={selectedIncident} onClose={handleCloseIncidentModal} />
+      <IncidentComentariosModal
+        incident={incidentForComentario}
+        onClose={() => setIncidentForComentario(null)}
+        onSave={handleSaveComentario}
+      />
 
       <footer className="app-footer">
         <p>Dashboard Granel - by DigitalManager NATU</p>

@@ -92,6 +92,15 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
               {incident.incidentDetails || 'Sin detalles adicionales'}
             </div>
           </div>
+
+          {incident.comentarios && (
+            <div className="incident-details-section">
+              <h4>Comentarios de gestión</h4>
+              <div className="incident-details-text">
+                {incident.comentarios}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="modal-footer">

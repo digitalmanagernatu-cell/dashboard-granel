@@ -21,6 +21,7 @@ export interface Incident {
   incidentDate: string;     // Column I
   status: string;           // Column J (Pendiente/Cerrada)
   gestionadaPor: string;    // Column K
+  comentarios: string;      // Column L
   rowIndex: number;
 }
 
