@@ -110,8 +110,9 @@ export async function fetchTransferReceipts(
  * Fetches incidents from a public Google Sheet
  * Uses the public visualization endpoint (no API key required)
  * Column mapping:
- * A(0): Fecha, B(1): Nº Cliente, C(2): Nombre Cliente, D(3): Nº Pedido,
- * E(4): Tipo Incidencia, F(5): Detalles, G(6): Fuente, H(7): Estado
+ * A(0): Nº Incidencia, B(1): Código Cliente, C(2): Nombre Cliente, D(3): CIF,
+ * E(4): Comercial, F(5): Nº Factura, G(6): Tipo Incidencia, H(7): Detalle Incidencia,
+ * I(8): Fecha, J(9): Estado
  */
 export async function fetchIncidents(
   spreadsheetId: string,
@@ -150,8 +151,8 @@ export async function fetchIncidents(
   return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
     const cells = row.c || [];
 
-    // Column A (index 0) is date
-    const dateCell = cells[0];
+    // Column I (index 8) is date
+    const dateCell = cells[8];
     let incidentDate = '';
     if (dateCell) {
       const rawDate = getCellValue(dateCell);
@@ -159,14 +160,16 @@ export async function fetchIncidents(
     }
 
     return {
-      source: getCellValue(cells[6]),          // Column G: Fuente
-      clientNumber: getCellValue(cells[1]),    // Column B: Nº Cliente
-      clientName: getCellValue(cells[2]),      // Column C: Nombre Cliente
-      orderNumber: getCellValue(cells[3]),     // Column D: Nº Pedido
-      incidentType: getCellValue(cells[4]),    // Column E: Tipo Incidencia
-      incidentDetails: getCellValue(cells[5]), // Column F: Detalles Incidencia
-      incidentDate,                            // Column A: Fecha
-      status: getCellValue(cells[7]) || 'Abierta', // Column H: Estado (default Abierta)
+      incidentNumber: getCellValue(cells[0]),   // Column A: Nº Incidencia
+      clientNumber: getCellValue(cells[1]),      // Column B: Código Cliente
+      clientName: getCellValue(cells[2]),        // Column C: Nombre Cliente
+      cif: getCellValue(cells[3]),               // Column D: CIF
+      comercial: getCellValue(cells[4]),         // Column E: Comercial
+      invoiceNumber: getCellValue(cells[5]),     // Column F: Nº Factura
+      incidentType: getCellValue(cells[6]),      // Column G: Tipo Incidencia
+      incidentDetails: getCellValue(cells[7]),   // Column H: Detalle Incidencia
+      incidentDate,                              // Column I: Fecha
+      status: getCellValue(cells[9]) || 'Abierta', // Column J: Estado (default Abierta)
       rowIndex: index,
     };
   });
