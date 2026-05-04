@@ -9,14 +9,15 @@ export interface TransferReceipt {
 }
 
 export interface Incident {
-  source: string;           // Column G
+  incidentNumber: string;   // Column A
   clientNumber: string;     // Column B
   clientName: string;       // Column C
-  orderNumber: string;      // Column D
-  incidentType: string;     // Column E
-  incidentDetails: string;  // Column F
-  incidentDate: string;     // Column A
-  status: string;           // Column H (Abierta/Cerrada)
+  cif: string;              // Column D
+  invoiceNumber: string;    // Column E
+  incidentType: string;     // Column F
+  incidentDetails: string;  // Column G
+  incidentDate: string;     // Column H
+  status: string;           // Column I (Abierta/Cerrada)
   rowIndex: number;         // Original row position in the sheet (for sorting)
 }
 

@@ -40,7 +40,7 @@ function getTransferId(transfer: TransferReceipt): string {
 }
 
 function getIncidentId(incident: Incident): string {
-  return `${incident.clientNumber}-${incident.orderNumber}-${incident.incidentDate}-${incident.rowIndex}`;
+  return `${incident.incidentNumber}-${incident.clientNumber}-${incident.incidentDate}-${incident.rowIndex}`;
 }
 
 function App() {
@@ -190,13 +190,15 @@ function App() {
   const currentRefresh = currentView === 'transfers' ? transfersData.refresh :
                          currentView === 'incidents' ? incidentsData.refresh : () => {};
 
-  // Filter incidents by search term (client number or order number)
+  // Filter incidents by search term (client number, name, CIF or invoice number)
   const filteredIncidents = incidentSearch
     ? incidentsData.incidents.filter(incident => {
         const searchLower = incidentSearch.toLowerCase();
         return (
           incident.clientNumber.toLowerCase().includes(searchLower) ||
-          incident.orderNumber.toLowerCase().includes(searchLower)
+          incident.clientName.toLowerCase().includes(searchLower) ||
+          incident.cif.toLowerCase().includes(searchLower) ||
+          incident.invoiceNumber.toLowerCase().includes(searchLower)
         );
       })
     : incidentsData.incidents;

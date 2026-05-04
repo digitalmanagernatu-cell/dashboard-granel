@@ -71,10 +71,12 @@ export function IncidentTable({
         <thead>
           <tr>
             <th>Visto</th>
+            <th>Nº Incidencia</th>
             <th>Fecha</th>
-            <th>Nº Cliente</th>
+            <th>Cód. Cliente</th>
             <th>Nombre Cliente</th>
-            <th>Nº Pedido</th>
+            <th>CIF</th>
+            <th>Nº Factura</th>
             <th>Tipo Incidencia</th>
             <th>Detalles</th>
             <th>Estado</th>
@@ -86,7 +88,7 @@ export function IncidentTable({
             const isOpen = incident.status.toLowerCase() === 'abierta';
             return (
               <tr
-                key={`${incident.clientNumber}-${incident.orderNumber}-${index}`}
+                key={`${incident.incidentNumber}-${incident.clientNumber}-${index}`}
                 className={isViewed ? '' : 'row-unviewed'}
               >
                 <td className="viewed-cell">
@@ -98,6 +100,7 @@ export function IncidentTable({
                     {isViewed ? <EyeIcon /> : <EyeOffIcon />}
                   </button>
                 </td>
+                <td>{incident.incidentNumber}</td>
                 <td>{formatDateOnly(incident.incidentDate)}</td>
                 <td>
                   <button
@@ -117,7 +120,8 @@ export function IncidentTable({
                     {incident.clientName}
                   </button>
                 </td>
-                <td>{incident.orderNumber}</td>
+                <td>{incident.cif}</td>
+                <td>{incident.invoiceNumber}</td>
                 <td className="incident-type-cell">{incident.incidentType}</td>
                 <td className="details-btn-cell">
                   <button

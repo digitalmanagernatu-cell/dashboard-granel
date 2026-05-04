@@ -29,7 +29,7 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
         <div className="modal-header">
           <div className="modal-title">
             <h3>Detalles de Incidencia</h3>
-            <p>Pedido: {incident.orderNumber} - Cliente: {incident.clientName}</p>
+            <p>Incidencia: {incident.incidentNumber} - Cliente: {incident.clientName}</p>
           </div>
           <button className="modal-close" onClick={onClose}>
             &times;
@@ -39,11 +39,15 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
         <div className="modal-body incident-detail-body">
           <div className="incident-detail-grid">
             <div className="detail-row">
+              <span className="detail-label">Nº Incidencia:</span>
+              <span className="detail-value">{incident.incidentNumber}</span>
+            </div>
+            <div className="detail-row">
               <span className="detail-label">Fecha:</span>
               <span className="detail-value">{formatDateOnly(incident.incidentDate)}</span>
             </div>
             <div className="detail-row">
-              <span className="detail-label">Nº Cliente:</span>
+              <span className="detail-label">Cód. Cliente:</span>
               <span className="detail-value">{incident.clientNumber}</span>
             </div>
             <div className="detail-row">
@@ -51,8 +55,12 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
               <span className="detail-value">{incident.clientName}</span>
             </div>
             <div className="detail-row">
-              <span className="detail-label">Nº Pedido:</span>
-              <span className="detail-value">{incident.orderNumber}</span>
+              <span className="detail-label">CIF:</span>
+              <span className="detail-value">{incident.cif}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Nº Factura:</span>
+              <span className="detail-value">{incident.invoiceNumber}</span>
             </div>
             <div className="detail-row">
               <span className="detail-label">Tipo Incidencia:</span>
@@ -64,12 +72,6 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
                 {incident.status}
               </span>
             </div>
-            {incident.source && (
-              <div className="detail-row">
-                <span className="detail-label">Fuente:</span>
-                <span className="detail-value">{incident.source}</span>
-              </div>
-            )}
           </div>
 
           <div className="incident-details-section">
