@@ -607,6 +607,25 @@
   background-color: #cec7ac;
 }
 
+.gestionado-por-cell {
+  min-width: 110px;
+}
+
+.gestionado-por-select {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #d3d7c4;
+  border-radius: 4px;
+  background-color: #f9f9f7;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.gestionado-por-select:focus {
+  outline: none;
+  border-color: #3e3f3e;
+}
+
 /* Incident Detail Modal */
 .incident-detail-modal {
   max-width: 600px;

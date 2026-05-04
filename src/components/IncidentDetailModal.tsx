@@ -21,7 +21,7 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
     return match ? match[1] : dateString;
   };
 
-  const isOpen = incident.status.toLowerCase() === 'abierta';
+  const isOpen = incident.status.toLowerCase() !== 'cerrada';
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
@@ -67,8 +67,16 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
               <span className="detail-value">{incident.invoiceNumber}</span>
             </div>
             <div className="detail-row">
+              <span className="detail-label">Comercial:</span>
+              <span className="detail-value">{incident.comercial}</span>
+            </div>
+            <div className="detail-row">
               <span className="detail-label">Tipo Incidencia:</span>
               <span className="detail-value">{incident.incidentType}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Gestionada Por:</span>
+              <span className="detail-value">{incident.gestionadaPor || '—'}</span>
             </div>
             <div className="detail-row">
               <span className="detail-label">Estado:</span>

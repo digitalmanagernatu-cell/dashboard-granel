@@ -1,53 +1,23 @@
 import type { Incident } from '../types/transfer';
 
+const GESTIONADO_OPTIONS = ['', 'Patri', 'Paqui', 'Mauro', 'Jaime'];
+
 interface IncidentTableProps {
   incidents: Incident[];
-  onToggleViewed: (incident: Incident) => void;
   onToggleStatus: (incident: Incident) => void;
   onViewDetails: (incident: Incident) => void;
   onClientClick: (clientSearch: string) => void;
+  onUpdateGestionadaPor: (incident: Incident, value: string) => void;
   loading: boolean;
-  viewedIncidents: Set<string>;
-  getIncidentId: (incident: Incident) => string;
-}
-
-// Eye icon for viewed items
-function EyeIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-// Eye with slash icon for not viewed items
-function EyeOffIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-      <line x1="1" y1="1" x2="23" y2="23" />
-    </svg>
-  );
-}
-
-// Format date to only show day/month/year (remove time)
-function formatDateOnly(dateString: string): string {
-  if (!dateString) return '';
-  // Already in DD/MM/YYYY format, just ensure no time part
-  const match = dateString.match(/^(\d{1,2}\/\d{1,2}\/\d{4})/);
-  return match ? match[1] : dateString;
 }
 
 export function IncidentTable({
   incidents,
-  onToggleViewed,
   onToggleStatus,
   onViewDetails,
   onClientClick,
+  onUpdateGestionadaPor,
   loading,
-  viewedIncidents,
-  getIncidentId
 }: IncidentTableProps) {
   if (loading) {
     return (
@@ -70,39 +40,25 @@ export function IncidentTable({
       <table className="transfers-table incidents-table">
         <thead>
           <tr>
-            <th>Visto</th>
             <th>Nº Incidencia</th>
             <th>Fecha</th>
             <th>Cód. Cliente</th>
             <th>Nombre Cliente</th>
             <th>CIF</th>
-            <th>Comercial</th>
             <th>Nº Factura</th>
             <th>Tipo Incidencia</th>
+            <th>Gestionado Por</th>
             <th>Detalles</th>
             <th>Estado</th>
           </tr>
         </thead>
         <tbody>
           {incidents.map((incident, index) => {
-            const isViewed = viewedIncidents.has(getIncidentId(incident));
-            const isOpen = incident.status.toLowerCase() === 'abierta';
+            const isOpen = incident.status.toLowerCase() !== 'cerrada';
             return (
-              <tr
-                key={`${incident.incidentNumber}-${incident.clientNumber}-${index}`}
-                className={isViewed ? '' : 'row-unviewed'}
-              >
-                <td className="viewed-cell">
-                  <button
-                    className={`viewed-icon-btn ${isViewed ? 'viewed' : 'not-viewed'}`}
-                    onClick={() => onToggleViewed(incident)}
-                    title={isViewed ? 'Marcar como no visto' : 'Marcar como visto'}
-                  >
-                    {isViewed ? <EyeIcon /> : <EyeOffIcon />}
-                  </button>
-                </td>
+              <tr key={`${incident.incidentNumber}-${index}`}>
                 <td>{incident.incidentNumber}</td>
-                <td>{formatDateOnly(incident.incidentDate)}</td>
+                <td>{incident.incidentDate}</td>
                 <td>
                   <button
                     className="client-link"
@@ -122,9 +78,19 @@ export function IncidentTable({
                   </button>
                 </td>
                 <td>{incident.cif}</td>
-                <td>{incident.comercial}</td>
                 <td>{incident.invoiceNumber}</td>
                 <td className="incident-type-cell">{incident.incidentType}</td>
+                <td className="gestionado-por-cell">
+                  <select
+                    value={incident.gestionadaPor}
+                    onChange={(e) => onUpdateGestionadaPor(incident, e.target.value)}
+                    className="gestionado-por-select"
+                  >
+                    {GESTIONADO_OPTIONS.map(opt => (
+                      <option key={opt} value={opt}>{opt || 'Sin asignar'}</option>
+                    ))}
+                  </select>
+                </td>
                 <td className="details-btn-cell">
                   <button
                     className="btn-view-details"

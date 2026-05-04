@@ -118,7 +118,8 @@ export async function fetchIncidents(
   spreadsheetId: string,
   sheetGid: string = '0'
 ): Promise<Incident[]> {
-  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&gid=${sheetGid}`;
+  // headers=1 tells gviz to skip the first row (column headers)
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&gid=${sheetGid}&headers=1`;
 
   const response = await fetch(url);
 
@@ -151,12 +152,17 @@ export async function fetchIncidents(
   return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
     const cells = row.c || [];
 
-    // Column I (index 8) is date
+    // Column I (index 8): strip time from formatted date value
     const dateCell = cells[8];
     let incidentDate = '';
     if (dateCell) {
-      const rawDate = getCellValue(dateCell);
-      incidentDate = formatToSpanishDate(rawDate);
+      if (typeof dateCell.f === 'string' && dateCell.f) {
+        // "May 4, 2026, 12:44:08 AM" → "May 4, 2026"
+        incidentDate = dateCell.f.replace(/,?\s*\d{1,2}:\d{2}(:\d{2})?(\s*(AM|PM))?/i, '').trim();
+      } else {
+        const rawDate = dateCell.v !== null && dateCell.v !== undefined ? String(dateCell.v) : '';
+        incidentDate = formatToSpanishDate(rawDate);
+      }
     }
 
     return {
@@ -169,7 +175,8 @@ export async function fetchIncidents(
       incidentType: getCellValue(cells[6]),      // Column G: Tipo Incidencia
       incidentDetails: getCellValue(cells[7]),   // Column H: Detalle Incidencia
       incidentDate,                              // Column I: Fecha
-      status: getCellValue(cells[9]) || 'Abierta', // Column J: Estado (default Abierta)
+      status: getCellValue(cells[9]) || 'Pendiente', // Column J: Estado
+      gestionadaPor: getCellValue(cells[10]),    // Column K: Gestionada Por
       rowIndex: index,
     };
   });
@@ -193,7 +200,8 @@ export async function updateIncidentStatus(
       },
       body: JSON.stringify({
         action: 'updateStatus',
-        row: rowIndex + 2, // +2 because: +1 for 0-index, +1 for header row
+        row: rowIndex + 2, // +2: +1 for 0-index, +1 for header row
+        column: 'J',
         status: newStatus,
       }),
     });
@@ -207,10 +215,30 @@ export async function updateIncidentStatus(
   }
 }
 
-/**
- * Updates the viewed status of a transfer in Google Sheets
- * Requires an Apps Script web app deployed on the transfers spreadsheet
- */
+export async function updateGestionadaPor(
+  webAppUrl: string,
+  rowIndex: number,
+  value: string
+): Promise<boolean> {
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateGestionadaPor',
+        row: rowIndex + 2,
+        column: 'K',
+        value,
+      }),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating gestionadaPor:', error);
+    return false;
+  }
+}
+
 export async function updateTransferViewed(
   webAppUrl: string,
   rowIndex: number,
@@ -220,16 +248,13 @@ export async function updateTransferViewed(
     await fetch(webAppUrl, {
       method: 'POST',
       mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'updateViewed',
-        row: rowIndex + 2, // +2: 0-index + header row
+        row: rowIndex + 2,
         viewed: viewed ? 'Sí' : 'No',
       }),
     });
-
     return true;
   } catch (error) {
     console.error('Error updating viewed status:', error);
