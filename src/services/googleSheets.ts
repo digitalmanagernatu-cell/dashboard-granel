@@ -90,6 +90,9 @@ export async function fetchTransferReceipts(
       submissionDate = formatToSpanishDate(rawDate);
     }
 
+    const viewedRaw = getCellValue(cells[6]).toLowerCase();
+    const viewed = viewedRaw === 'sí' || viewedRaw === 'si' || viewedRaw === 'true';
+
     return {
       source: getCellValue(cells[5]),
       clientNumber: getCellValue(cells[0]),
@@ -97,6 +100,7 @@ export async function fetchTransferReceipts(
       orderNumber: getCellValue(cells[2]),
       submissionDate,
       receiptUrl: getCellValue(cells[4]),
+      viewed,                              // Column G: Visto
       rowIndex: index, // Track original position for sorting
     };
   });
@@ -231,6 +235,29 @@ export async function updateGestionadaPor(
     return true;
   } catch (error) {
     console.error('Error updating gestionadaPor:', error);
+    return false;
+  }
+}
+
+export async function updateTransferViewed(
+  webAppUrl: string,
+  rowIndex: number,
+  viewed: boolean
+): Promise<boolean> {
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateViewed',
+        row: rowIndex + 2,
+        viewed: viewed ? 'Sí' : 'No',
+      }),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating viewed status:', error);
     return false;
   }
 }

@@ -10,7 +10,7 @@ import { IncidentDetailModal } from './components/IncidentDetailModal';
 import { WhatsAppDashboard } from './components/WhatsAppDashboard';
 import { useTransferData } from './hooks/useTransferData';
 import { useIncidentData } from './hooks/useIncidentData';
-import { updateIncidentStatus, updateGestionadaPor } from './services/googleSheets';
+import { updateIncidentStatus, updateGestionadaPor, updateTransferViewed } from './services/googleSheets';
 import type { TransferReceipt, Incident, DashboardView } from './types/transfer';
 import './App.css';
 
@@ -20,10 +20,10 @@ const TRANSFERS_SHEET_GID = import.meta.env.VITE_SHEET_GID || '0';
 const INCIDENTS_SPREADSHEET_ID = '1e5B9tG28fE1dzthZlQVTIyvrLMzJSQTVPZpXaOhdYRc';
 const INCIDENTS_SHEET_GID = '0';
 
-// Google Apps Script Web App URL for updating incidents
+// Google Apps Script Web App URLs
 const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzHOM0yB-GvqTsAJdJI0LaiOLOwcozcnG2HHZ_7OvZiemwGphnbLFO7FUsXxrYLiXU5/exec';
+const TRANSFERS_WEB_APP_URL = import.meta.env.VITE_TRANSFERS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzMfPUnhtSDYXA5We7zK2jrIMBrUOoDbHCi53LY73GOZgPFZhI1On0TVD-HlEJ_0pu3/exec';
 
-const VIEWED_RECEIPTS_KEY = 'granel-viewed-receipts';
 
 function formatLastUpdate(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
@@ -34,9 +34,6 @@ function formatLastUpdate(date: Date): string {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-function getTransferId(transfer: TransferReceipt): string {
-  return `${transfer.clientNumber}-${transfer.orderNumber}-${transfer.submissionDate}`;
-}
 
 function App() {
   const [currentView, setCurrentView] = useState<DashboardView>('transfers');
@@ -49,10 +46,6 @@ function App() {
   const [lastUpdateTransfers, setLastUpdateTransfers] = useState<Date | null>(null);
   const [lastUpdateIncidents, setLastUpdateIncidents] = useState<Date | null>(null);
 
-  const [viewedReceipts, setViewedReceipts] = useState<Set<string>>(() => {
-    const stored = localStorage.getItem(VIEWED_RECEIPTS_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  });
 
   // Data hooks
   const transfersData = useTransferData({
@@ -78,29 +71,29 @@ function App() {
     }
   }, [incidentsData.allIncidents]);
 
-  // Persist viewed items to localStorage
-  useEffect(() => {
-    localStorage.setItem(VIEWED_RECEIPTS_KEY, JSON.stringify([...viewedReceipts]));
-  }, [viewedReceipts]);
 
   // Handlers for transfers
   const handleViewReceipt = (transfer: TransferReceipt) => {
-    const id = getTransferId(transfer);
-    setViewedReceipts(prev => new Set([...prev, id]));
+    // Mark as viewed in the sheet if not already viewed
+    if (!transfer.viewed) {
+      transfersData.updateLocalViewed(transfer.rowIndex, true);
+      if (TRANSFERS_WEB_APP_URL) {
+        updateTransferViewed(TRANSFERS_WEB_APP_URL, transfer.rowIndex, true);
+      }
+    }
     setSelectedTransfer(transfer);
   };
 
-  const handleToggleViewedTransfer = (transfer: TransferReceipt) => {
-    const id = getTransferId(transfer);
-    setViewedReceipts(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
+  const handleToggleViewedTransfer = async (transfer: TransferReceipt) => {
+    const newViewed = !transfer.viewed;
+    transfersData.updateLocalViewed(transfer.rowIndex, newViewed);
+    if (TRANSFERS_WEB_APP_URL) {
+      const success = await updateTransferViewed(TRANSFERS_WEB_APP_URL, transfer.rowIndex, newViewed);
+      if (!success) {
+        // Revert on failure
+        transfersData.updateLocalViewed(transfer.rowIndex, transfer.viewed);
       }
-      return newSet;
-    });
+    }
   };
 
   const handleClientClickTransfers = (clientSearch: string) => {
@@ -246,8 +239,6 @@ function App() {
               onToggleViewed={handleToggleViewedTransfer}
               onClientClick={handleClientClickTransfers}
               loading={transfersData.loading}
-              viewedReceipts={viewedReceipts}
-              getTransferId={getTransferId}
             />
           </>
         )}

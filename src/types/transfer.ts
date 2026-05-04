@@ -5,6 +5,7 @@ export interface TransferReceipt {
   orderNumber: string;
   submissionDate: string;
   receiptUrl: string;
+  viewed: boolean;          // Column G: Visto (Sí/No)
   rowIndex: number; // Original row position in the sheet (for sorting)
 }
 
