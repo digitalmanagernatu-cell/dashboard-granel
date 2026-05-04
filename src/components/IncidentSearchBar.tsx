@@ -21,7 +21,7 @@ export function IncidentSearchBar({ searchValue, onSearchChange }: IncidentSearc
         </span>
         <input
           type="text"
-          placeholder="Buscar por Nº Cliente o Nº Pedido..."
+          placeholder="Buscar por Nº Cliente, CIF o Nº Factura..."
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           className="search-input"

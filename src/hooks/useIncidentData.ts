@@ -103,10 +103,13 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
         }
       }
 
-      // Filter by order number
+      // Filter by CIF or invoice number
       if (filters.orderSearch) {
         const searchLower = filters.orderSearch.toLowerCase();
-        if (!incident.orderNumber.toLowerCase().includes(searchLower)) {
+        const matchesCifOrInvoice =
+          incident.cif.toLowerCase().includes(searchLower) ||
+          incident.invoiceNumber.toLowerCase().includes(searchLower);
+        if (!matchesCifOrInvoice) {
           return false;
         }
       }
