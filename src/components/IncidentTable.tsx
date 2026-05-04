@@ -66,7 +66,7 @@ export function IncidentTable({
             <th className="col-cif">CIF</th>
             <th className="col-factura">Nº Factura</th>
             <th className="col-tipo">Tipo Incidencia</th>
-            <th className="col-gestionado">Gestionado Por</th>
+            <th className="col-gestionado">Gestiona</th>
             <th className="col-estado">Estado</th>
             <th className="col-acciones">Acciones</th>
           </tr>
