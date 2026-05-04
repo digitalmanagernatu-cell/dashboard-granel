@@ -10,7 +10,7 @@ import { IncidentDetailModal } from './components/IncidentDetailModal';
 import { WhatsAppDashboard } from './components/WhatsAppDashboard';
 import { useTransferData } from './hooks/useTransferData';
 import { useIncidentData } from './hooks/useIncidentData';
-import { updateIncidentStatus } from './services/googleSheets';
+import { updateIncidentStatus, updateGestionadaPor } from './services/googleSheets';
 import type { TransferReceipt, Incident, DashboardView } from './types/transfer';
 import './App.css';
 
@@ -24,7 +24,6 @@ const INCIDENTS_SHEET_GID = '0';
 const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzHOM0yB-GvqTsAJdJI0LaiOLOwcozcnG2HHZ_7OvZiemwGphnbLFO7FUsXxrYLiXU5/exec';
 
 const VIEWED_RECEIPTS_KEY = 'granel-viewed-receipts';
-const VIEWED_INCIDENTS_KEY = 'granel-viewed-incidents';
 
 function formatLastUpdate(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
@@ -39,33 +38,19 @@ function getTransferId(transfer: TransferReceipt): string {
   return `${transfer.clientNumber}-${transfer.orderNumber}-${transfer.submissionDate}`;
 }
 
-function getIncidentId(incident: Incident): string {
-  return `${incident.incidentNumber}-${incident.clientNumber}-${incident.incidentDate}-${incident.rowIndex}`;
-}
-
 function App() {
-  // Dashboard view state
   const [currentView, setCurrentView] = useState<DashboardView>('transfers');
 
-  // Modal state
   const [selectedTransfer, setSelectedTransfer] = useState<TransferReceipt | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
-  // Incident search state
   const [incidentSearch, setIncidentSearch] = useState('');
 
-  // Last update timestamps
   const [lastUpdateTransfers, setLastUpdateTransfers] = useState<Date | null>(null);
   const [lastUpdateIncidents, setLastUpdateIncidents] = useState<Date | null>(null);
 
-  // Viewed items state (stored separately for each dashboard)
   const [viewedReceipts, setViewedReceipts] = useState<Set<string>>(() => {
     const stored = localStorage.getItem(VIEWED_RECEIPTS_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  });
-
-  const [viewedIncidents, setViewedIncidents] = useState<Set<string>>(() => {
-    const stored = localStorage.getItem(VIEWED_INCIDENTS_KEY);
     return stored ? new Set(JSON.parse(stored)) : new Set();
   });
 
@@ -98,10 +83,6 @@ function App() {
     localStorage.setItem(VIEWED_RECEIPTS_KEY, JSON.stringify([...viewedReceipts]));
   }, [viewedReceipts]);
 
-  useEffect(() => {
-    localStorage.setItem(VIEWED_INCIDENTS_KEY, JSON.stringify([...viewedIncidents]));
-  }, [viewedIncidents]);
-
   // Handlers for transfers
   const handleViewReceipt = (transfer: TransferReceipt) => {
     const id = getTransferId(transfer);
@@ -130,21 +111,8 @@ function App() {
   };
 
   // Handlers for incidents
-  const handleToggleViewedIncident = (incident: Incident) => {
-    const id = getIncidentId(incident);
-    setViewedIncidents(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
-  };
-
   const handleToggleIncidentStatus = async (incident: Incident) => {
-    const newStatus = incident.status.toLowerCase() === 'abierta' ? 'Cerrada' : 'Abierta';
+    const newStatus = incident.status.toLowerCase() !== 'cerrada' ? 'Cerrada' : 'Abierta';
 
     // Optimistic update - update UI immediately
     incidentsData.updateLocalStatus(incident.rowIndex, newStatus);
@@ -156,6 +124,18 @@ function App() {
         // Revert on failure
         incidentsData.updateLocalStatus(incident.rowIndex, incident.status);
         console.error('Failed to update status in sheet');
+      }
+    }
+  };
+
+  const handleUpdateGestionadaPor = async (incident: Incident, value: string) => {
+    incidentsData.updateLocalGestionadaPor(incident.rowIndex, value);
+
+    if (INCIDENTS_WEB_APP_URL) {
+      const success = await updateGestionadaPor(INCIDENTS_WEB_APP_URL, incident.rowIndex, value);
+      if (!success) {
+        incidentsData.updateLocalGestionadaPor(incident.rowIndex, incident.gestionadaPor);
+        console.error('Failed to update gestionadaPor in sheet');
       }
     }
   };
@@ -296,13 +276,11 @@ function App() {
 
             <IncidentTable
               incidents={filteredIncidents}
-              onToggleViewed={handleToggleViewedIncident}
               onToggleStatus={handleToggleIncidentStatus}
               onViewDetails={handleViewIncidentDetails}
               onClientClick={handleClientClickIncidents}
+              onUpdateGestionadaPor={handleUpdateGestionadaPor}
               loading={incidentsData.loading}
-              viewedIncidents={viewedIncidents}
-              getIncidentId={getIncidentId}
             />
           </>
         )}

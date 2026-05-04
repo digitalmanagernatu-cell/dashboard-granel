@@ -38,7 +38,7 @@ function CheckIcon() {
 export function IncidentCharts({ incidents }: IncidentChartsProps) {
   // Calculate statistics
   const total = incidents.length;
-  const open = incidents.filter(i => i.status.toLowerCase() === 'abierta').length;
+  const open = incidents.filter(i => i.status.toLowerCase() !== 'cerrada').length;
   const closed = incidents.filter(i => i.status.toLowerCase() === 'cerrada').length;
 
   // Calculate incident types distribution

@@ -18,8 +18,9 @@ export interface Incident {
   incidentType: string;     // Column G
   incidentDetails: string;  // Column H
   incidentDate: string;     // Column I
-  status: string;           // Column J (Abierta/Cerrada)
-  rowIndex: number;         // Original row position in the sheet (for sorting)
+  status: string;           // Column J (Pendiente/Cerrada)
+  gestionadaPor: string;    // Column K
+  rowIndex: number;
 }
 
 export interface TransferFilters {
