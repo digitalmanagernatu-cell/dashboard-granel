@@ -43,7 +43,6 @@ export function IncidentTable({
             <th>Nº Incidencia</th>
             <th>Fecha</th>
             <th>Cód. Cliente</th>
-            <th>Nombre Cliente</th>
             <th>CIF</th>
             <th>Nº Factura</th>
             <th>Tipo Incidencia</th>
@@ -66,15 +65,6 @@ export function IncidentTable({
                     title="Filtrar por este cliente"
                   >
                     {incident.clientNumber}
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="client-link"
-                    onClick={() => onClientClick(incident.clientName)}
-                    title="Filtrar por este cliente"
-                  >
-                    {incident.clientName}
                   </button>
                 </td>
                 <td>{incident.cif}</td>
