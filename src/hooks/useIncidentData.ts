@@ -84,6 +84,14 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
     ));
   }, []);
 
+  const updateLocalComentarios = useCallback((rowIndex: number, value: string) => {
+    setAllIncidents(prev => prev.map(incident =>
+      incident.rowIndex === rowIndex
+        ? { ...incident, comentarios: value }
+        : incident
+    ));
+  }, []);
+
   const filteredIncidents = useMemo(() => {
     const filtered = allIncidents.filter((incident) => {
       // Filter by date range
@@ -176,5 +184,6 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
     refresh,
     updateLocalStatus,
     updateLocalGestionadaPor,
+    updateLocalComentarios,
   };
 }

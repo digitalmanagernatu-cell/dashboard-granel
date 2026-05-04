@@ -177,6 +177,7 @@ export async function fetchIncidents(
       incidentDate,                              // Column I: Fecha
       status: getCellValue(cells[9]) || 'Pendiente', // Column J: Estado
       gestionadaPor: getCellValue(cells[10]),    // Column K: Gestionada Por
+      comentarios: getCellValue(cells[11]),      // Column L: Comentarios
       rowIndex: index,
     };
   });
@@ -235,6 +236,30 @@ export async function updateGestionadaPor(
     return true;
   } catch (error) {
     console.error('Error updating gestionadaPor:', error);
+    return false;
+  }
+}
+
+export async function updateComentarios(
+  webAppUrl: string,
+  rowIndex: number,
+  comentarios: string
+): Promise<boolean> {
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateComentarios',
+        row: rowIndex + 2,
+        column: 'L',
+        value: comentarios,
+      }),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating comentarios:', error);
     return false;
   }
 }

@@ -607,6 +607,17 @@
   background-color: #cec7ac;
 }
 
+/* Column widths for incident table */
+.incidents-table .col-incidencia { width: 110px; }
+.incidents-table .col-fecha      { width: 90px; white-space: nowrap; }
+.incidents-table .col-cliente    { width: 80px; }
+.incidents-table .col-cif        { width: 100px; }
+.incidents-table .col-factura    { width: 80px; }
+.incidents-table .col-tipo       { width: 130px; }
+.incidents-table .col-gestionado { width: 110px; }
+.incidents-table .col-estado     { width: 80px; }
+.incidents-table .col-acciones   { width: 64px; text-align: center; }
+
 .gestionado-por-cell {
   min-width: 110px;
 }
@@ -624,6 +635,81 @@
 .gestionado-por-select:focus {
   outline: none;
   border-color: #3e3f3e;
+}
+
+/* Action icon buttons */
+.acciones-btns {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d3d7c4;
+  border-radius: 5px;
+  background: #f9f9f7;
+  cursor: pointer;
+  color: #5a5b5a;
+  transition: background 0.15s, color 0.15s;
+}
+
+.icon-btn:hover {
+  background: #e8e6df;
+  color: #2e2f2e;
+}
+
+.icon-btn-pencil.has-comment {
+  border-color: #a0b48a;
+  color: #5a7a3a;
+  background: #f0f5eb;
+}
+
+/* Comentarios Modal */
+.comentarios-modal {
+  max-width: 500px;
+  width: 95%;
+}
+
+.comentarios-body {
+  padding: 1.25rem 1.5rem;
+}
+
+.comentarios-textarea {
+  width: 100%;
+  min-height: 130px;
+  padding: 10px 12px;
+  border: 1px solid #d3d7c4;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  background: #fafaf8;
+  box-sizing: border-box;
+}
+
+.comentarios-textarea:focus {
+  outline: none;
+  border-color: #3e3f3e;
+}
+
+.btn-primary {
+  padding: 8px 20px;
+  background-color: #3e3f3e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #2a2b2a;
 }
 
 /* Incident Detail Modal */
