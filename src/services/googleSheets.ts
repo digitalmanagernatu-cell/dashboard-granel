@@ -7,8 +7,8 @@ import type { TransferReceipt, Incident, WhatsAppMessage } from '../types/transf
 function formatToSpanishDate(dateString: string): string {
   if (!dateString) return '';
 
-  // Handle Google Sheets date format: Date(year, month, day)
-  const googleMatch = dateString.match(/Date\((\d+),(\d+),(\d+)\)/);
+  // Handle Google Sheets date/datetime format: Date(year,month,day) or Date(year,month,day,h,m,s)
+  const googleMatch = dateString.match(/Date\((\d+),(\d+),(\d+)/);
   if (googleMatch) {
     const year = googleMatch[1];
     const month = String(parseInt(googleMatch[2], 10) + 1).padStart(2, '0');
@@ -152,17 +152,12 @@ export async function fetchIncidents(
   return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
     const cells = row.c || [];
 
-    // Column I (index 8): strip time from formatted date value
+    // Column I (index 8): always use raw value (v) to avoid locale/format issues
     const dateCell = cells[8];
     let incidentDate = '';
     if (dateCell) {
-      if (typeof dateCell.f === 'string' && dateCell.f) {
-        // "May 4, 2026, 12:44:08 AM" → "May 4, 2026"
-        incidentDate = dateCell.f.replace(/,?\s*\d{1,2}:\d{2}(:\d{2})?(\s*(AM|PM))?/i, '').trim();
-      } else {
-        const rawDate = dateCell.v !== null && dateCell.v !== undefined ? String(dateCell.v) : '';
-        incidentDate = formatToSpanishDate(rawDate);
-      }
+      const rawDate = dateCell.v !== null && dateCell.v !== undefined ? String(dateCell.v) : '';
+      incidentDate = formatToSpanishDate(rawDate);
     }
 
     return {
