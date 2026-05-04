@@ -21,7 +21,7 @@ const INCIDENTS_SPREADSHEET_ID = '1e5B9tG28fE1dzthZlQVTIyvrLMzJSQTVPZpXaOhdYRc';
 const INCIDENTS_SHEET_GID = '0';
 
 // Google Apps Script Web App URLs
-const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzHOM0yB-GvqTsAJdJI0LaiOLOwcozcnG2HHZ_7OvZiemwGphnbLFO7FUsXxrYLiXU5/exec';
+const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycby7ndSu1n9u5nPXol86sshY6KSCDEoIS0hlR7ognbh6EleDjJ11eno95aHCSOgl5E_a/exec';
 const TRANSFERS_WEB_APP_URL = import.meta.env.VITE_TRANSFERS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzMfPUnhtSDYXA5We7zK2jrIMBrUOoDbHCi53LY73GOZgPFZhI1On0TVD-HlEJ_0pu3/exec';
 
 
