@@ -42,6 +42,7 @@ export interface IncidentFilters {
   orderSearch: string;
   incidentTypeFilter: string;
   statusFilter: string;
+  gestionadaFilter: string;
 }
 
 // WhatsApp Log types
