@@ -22,6 +22,7 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
     orderSearch: '',
     incidentTypeFilter: '',
     statusFilter: '',
+    gestionadaFilter: '',
   });
 
   // Silent refresh (doesn't show loading state)
@@ -139,6 +140,13 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
       // Filter by status
       if (filters.statusFilter) {
         if (incident.status.toLowerCase() !== filters.statusFilter.toLowerCase()) {
+          return false;
+        }
+      }
+
+      // Filter by gestionada por
+      if (filters.gestionadaFilter) {
+        if (incident.gestionadaPor !== filters.gestionadaFilter) {
           return false;
         }
       }
