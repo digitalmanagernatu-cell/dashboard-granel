@@ -22,6 +22,8 @@ export interface Incident {
   status: string;           // Column J (Pendiente/Cerrada)
   gestionadaPor: string;    // Column K
   comentarios: string;      // Column L
+  images: string[];         // Column M (comma-separated URLs)
+  clientEmail: string;      // Column N
   rowIndex: number;
 }
 

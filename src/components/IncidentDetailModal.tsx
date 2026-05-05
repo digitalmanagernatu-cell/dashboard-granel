@@ -14,7 +14,6 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
     }
   };
 
-  // Format date to only show day/month/year
   const formatDateOnly = (dateString: string): string => {
     if (!dateString) return '';
     const match = dateString.match(/^(\d{1,2}\/\d{1,2}\/\d{4})/);
@@ -67,8 +66,8 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
               <span className="detail-value">{incident.invoiceNumber}</span>
             </div>
             <div className="detail-row">
-              <span className="detail-label">Comercial:</span>
-              <span className="detail-value">{incident.comercial}</span>
+              <span className="detail-label">Email Cliente:</span>
+              <span className="detail-value">{incident.clientEmail || '—'}</span>
             </div>
             <div className="detail-row">
               <span className="detail-label">Tipo Incidencia:</span>
@@ -92,6 +91,25 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
               {incident.incidentDetails || 'Sin detalles adicionales'}
             </div>
           </div>
+
+          {incident.images.length > 0 && (
+            <div className="incident-details-section">
+              <h4>Imágenes adjuntas</h4>
+              <div className="incident-images-list">
+                {incident.images.map((url, i) => (
+                  <a
+                    key={i}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="incident-image-link"
+                  >
+                    Imagen {i + 1}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           {incident.comentarios && (
             <div className="incident-details-section">
