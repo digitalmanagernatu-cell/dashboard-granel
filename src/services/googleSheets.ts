@@ -177,6 +177,8 @@ export async function fetchIncidents(
       status: getCellValue(cells[9]) || 'Pendiente', // Column J: Estado
       gestionadaPor: getCellValue(cells[10]),    // Column K: Gestionada Por
       comentarios: getCellValue(cells[11]),      // Column L: Comentarios
+      images: getCellValue(cells[12]).split(',').map(s => s.trim()).filter(Boolean), // Column M: Imágenes
+      clientEmail: getCellValue(cells[13]),      // Column N: Email Cliente
       rowIndex: index,
     };
   });
