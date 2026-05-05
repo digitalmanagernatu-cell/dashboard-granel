@@ -22,6 +22,7 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
     orderSearch: '',
     incidentTypeFilter: '',
     statusFilter: '',
+    gestionadaFilter: '',
   });
 
   // Silent refresh (doesn't show loading state)
@@ -68,11 +69,26 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
     return () => clearInterval(intervalId);
   }, [silentRefresh]);
 
-  // Update local incident status (optimistic update)
   const updateLocalStatus = useCallback((rowIndex: number, newStatus: string) => {
     setAllIncidents(prev => prev.map(incident =>
       incident.rowIndex === rowIndex
         ? { ...incident, status: newStatus }
+        : incident
+    ));
+  }, []);
+
+  const updateLocalGestionadaPor = useCallback((rowIndex: number, value: string) => {
+    setAllIncidents(prev => prev.map(incident =>
+      incident.rowIndex === rowIndex
+        ? { ...incident, gestionadaPor: value }
+        : incident
+    ));
+  }, []);
+
+  const updateLocalComentarios = useCallback((rowIndex: number, value: string) => {
+    setAllIncidents(prev => prev.map(incident =>
+      incident.rowIndex === rowIndex
+        ? { ...incident, comentarios: value }
         : incident
     ));
   }, []);
@@ -128,6 +144,13 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
         }
       }
 
+      // Filter by gestionada por
+      if (filters.gestionadaFilter) {
+        if (incident.gestionadaPor !== filters.gestionadaFilter) {
+          return false;
+        }
+      }
+
       return true;
     });
 
@@ -168,5 +191,7 @@ export function useIncidentData({ spreadsheetId, sheetGid = '0' }: UseIncidentDa
     setFilters,
     refresh,
     updateLocalStatus,
+    updateLocalGestionadaPor,
+    updateLocalComentarios,
   };
 }

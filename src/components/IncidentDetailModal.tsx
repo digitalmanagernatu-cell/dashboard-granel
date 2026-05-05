@@ -14,14 +14,13 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
     }
   };
 
-  // Format date to only show day/month/year
   const formatDateOnly = (dateString: string): string => {
     if (!dateString) return '';
     const match = dateString.match(/^(\d{1,2}\/\d{1,2}\/\d{4})/);
     return match ? match[1] : dateString;
   };
 
-  const isOpen = incident.status.toLowerCase() === 'abierta';
+  const isOpen = incident.status.toLowerCase() !== 'cerrada';
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
@@ -67,8 +66,16 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
               <span className="detail-value">{incident.invoiceNumber}</span>
             </div>
             <div className="detail-row">
+              <span className="detail-label">Email Cliente:</span>
+              <span className="detail-value">{incident.clientEmail || '—'}</span>
+            </div>
+            <div className="detail-row">
               <span className="detail-label">Tipo Incidencia:</span>
               <span className="detail-value">{incident.incidentType}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Gestionada Por:</span>
+              <span className="detail-value">{incident.gestionadaPor || '—'}</span>
             </div>
             <div className="detail-row">
               <span className="detail-label">Estado:</span>
@@ -84,6 +91,34 @@ export function IncidentDetailModal({ incident, onClose }: IncidentDetailModalPr
               {incident.incidentDetails || 'Sin detalles adicionales'}
             </div>
           </div>
+
+          {incident.images.length > 0 && (
+            <div className="incident-details-section">
+              <h4>Imágenes adjuntas</h4>
+              <div className="incident-images-list">
+                {incident.images.map((url, i) => (
+                  <a
+                    key={i}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="incident-image-link"
+                  >
+                    Imagen {i + 1}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {incident.comentarios && (
+            <div className="incident-details-section">
+              <h4>Comentarios de gestión</h4>
+              <div className="incident-details-text">
+                {incident.comentarios}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="modal-footer">

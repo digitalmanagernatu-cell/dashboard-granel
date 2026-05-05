@@ -7,8 +7,8 @@ import type { TransferReceipt, Incident, WhatsAppMessage } from '../types/transf
 function formatToSpanishDate(dateString: string): string {
   if (!dateString) return '';
 
-  // Handle Google Sheets date format: Date(year, month, day)
-  const googleMatch = dateString.match(/Date\((\d+),(\d+),(\d+)\)/);
+  // Handle Google Sheets date/datetime format: Date(year,month,day) or Date(year,month,day,h,m,s)
+  const googleMatch = dateString.match(/Date\((\d+),(\d+),(\d+)/);
   if (googleMatch) {
     const year = googleMatch[1];
     const month = String(parseInt(googleMatch[2], 10) + 1).padStart(2, '0');
@@ -90,6 +90,9 @@ export async function fetchTransferReceipts(
       submissionDate = formatToSpanishDate(rawDate);
     }
 
+    const viewedRaw = getCellValue(cells[6]).toLowerCase();
+    const viewed = viewedRaw === 'sí' || viewedRaw === 'si' || viewedRaw === 'true';
+
     return {
       source: getCellValue(cells[5]),
       clientNumber: getCellValue(cells[0]),
@@ -97,6 +100,7 @@ export async function fetchTransferReceipts(
       orderNumber: getCellValue(cells[2]),
       submissionDate,
       receiptUrl: getCellValue(cells[4]),
+      viewed,                              // Column G: Visto
       rowIndex: index, // Track original position for sorting
     };
   });
@@ -114,7 +118,8 @@ export async function fetchIncidents(
   spreadsheetId: string,
   sheetGid: string = '0'
 ): Promise<Incident[]> {
-  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&gid=${sheetGid}`;
+  // headers=1 tells gviz to skip the first row (column headers)
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&gid=${sheetGid}&headers=1`;
 
   const response = await fetch(url);
 
@@ -147,11 +152,15 @@ export async function fetchIncidents(
   return rows.map((row: { c: Array<{ v?: unknown; f?: string } | null> }, index: number) => {
     const cells = row.c || [];
 
-    // Column I (index 8) is date
+    // Column I (index 8): prefer raw value (v), fall back to formatted (f) stripping time
     const dateCell = cells[8];
     let incidentDate = '';
     if (dateCell) {
-      const rawDate = getCellValue(dateCell);
+      let rawDate = dateCell.v !== null && dateCell.v !== undefined ? String(dateCell.v) : '';
+      if (!rawDate && typeof dateCell.f === 'string' && dateCell.f) {
+        // Strip time portion from formatted value (e.g. "15/4/2026 0:00:00" → "15/4/2026")
+        rawDate = dateCell.f.replace(/\s+\d{1,2}:\d{2}(:\d{2})?$/, '').trim();
+      }
       incidentDate = formatToSpanishDate(rawDate);
     }
 
@@ -165,7 +174,11 @@ export async function fetchIncidents(
       incidentType: getCellValue(cells[6]),      // Column G: Tipo Incidencia
       incidentDetails: getCellValue(cells[7]),   // Column H: Detalle Incidencia
       incidentDate,                              // Column I: Fecha
-      status: getCellValue(cells[9]) || 'Abierta', // Column J: Estado (default Abierta)
+      status: getCellValue(cells[9]) || 'Pendiente', // Column J: Estado
+      gestionadaPor: getCellValue(cells[10]),    // Column K: Gestionada Por
+      comentarios: getCellValue(cells[11]),      // Column L: Comentarios
+      images: getCellValue(cells[12]).split(',').map(s => s.trim()).filter(Boolean), // Column M: Imágenes
+      clientEmail: getCellValue(cells[13]),      // Column N: Email Cliente
       rowIndex: index,
     };
   });
@@ -189,7 +202,8 @@ export async function updateIncidentStatus(
       },
       body: JSON.stringify({
         action: 'updateStatus',
-        row: rowIndex + 2, // +2 because: +1 for 0-index, +1 for header row
+        row: rowIndex + 2, // +2: +1 for 0-index, +1 for header row
+        column: 'J',
         status: newStatus,
       }),
     });
@@ -199,6 +213,77 @@ export async function updateIncidentStatus(
     return true;
   } catch (error) {
     console.error('Error updating incident status:', error);
+    return false;
+  }
+}
+
+export async function updateGestionadaPor(
+  webAppUrl: string,
+  rowIndex: number,
+  value: string
+): Promise<boolean> {
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateGestionadaPor',
+        row: rowIndex + 2,
+        column: 'K',
+        value,
+      }),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating gestionadaPor:', error);
+    return false;
+  }
+}
+
+export async function updateComentarios(
+  webAppUrl: string,
+  rowIndex: number,
+  comentarios: string
+): Promise<boolean> {
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateComentarios',
+        row: rowIndex + 2,
+        column: 'L',
+        value: comentarios,
+      }),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating comentarios:', error);
+    return false;
+  }
+}
+
+export async function updateTransferViewed(
+  webAppUrl: string,
+  rowIndex: number,
+  viewed: boolean
+): Promise<boolean> {
+  try {
+    await fetch(webAppUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateViewed',
+        row: rowIndex + 2,
+        viewed: viewed ? 'Sí' : 'No',
+      }),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating viewed status:', error);
     return false;
   }
 }

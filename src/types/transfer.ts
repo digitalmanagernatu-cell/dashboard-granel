@@ -5,6 +5,7 @@ export interface TransferReceipt {
   orderNumber: string;
   submissionDate: string;
   receiptUrl: string;
+  viewed: boolean;          // Column G: Visto (Sí/No)
   rowIndex: number; // Original row position in the sheet (for sorting)
 }
 
@@ -18,8 +19,12 @@ export interface Incident {
   incidentType: string;     // Column G
   incidentDetails: string;  // Column H
   incidentDate: string;     // Column I
-  status: string;           // Column J (Abierta/Cerrada)
-  rowIndex: number;         // Original row position in the sheet (for sorting)
+  status: string;           // Column J (Pendiente/Cerrada)
+  gestionadaPor: string;    // Column K
+  comentarios: string;      // Column L
+  images: string[];         // Column M (comma-separated URLs)
+  clientEmail: string;      // Column N
+  rowIndex: number;
 }
 
 export interface TransferFilters {
@@ -37,6 +42,7 @@ export interface IncidentFilters {
   orderSearch: string;
   incidentTypeFilter: string;
   statusFilter: string;
+  gestionadaFilter: string;
 }
 
 // WhatsApp Log types

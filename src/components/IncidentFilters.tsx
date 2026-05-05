@@ -8,8 +8,8 @@ interface IncidentFiltersProps {
 }
 
 export function IncidentFilters({ filters, onFiltersChange, incidents }: IncidentFiltersProps) {
-  // Get unique incident types from data
   const incidentTypes = [...new Set(incidents.map(i => i.incidentType).filter(Boolean))];
+  const gestionadaOptions = [...new Set(incidents.map(i => i.gestionadaPor).filter(Boolean))].sort();
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -41,6 +41,10 @@ export function IncidentFilters({ filters, onFiltersChange, incidents }: Inciden
     });
   };
 
+  const handleGestionadaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onFiltersChange({ ...filters, gestionadaFilter: e.target.value });
+  };
+
   const handleReset = () => {
     onFiltersChange({
       startDate: null,
@@ -49,6 +53,7 @@ export function IncidentFilters({ filters, onFiltersChange, incidents }: Inciden
       orderSearch: '',
       incidentTypeFilter: '',
       statusFilter: '',
+      gestionadaFilter: '',
     });
   };
 
@@ -105,6 +110,20 @@ export function IncidentFilters({ filters, onFiltersChange, incidents }: Inciden
             <option value="">Todos</option>
             <option value="Abierta">Abiertas</option>
             <option value="Cerrada">Cerradas</option>
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="gestionadaFilter">Gestiona</label>
+          <select
+            id="gestionadaFilter"
+            value={filters.gestionadaFilter}
+            onChange={handleGestionadaChange}
+          >
+            <option value="">Todos</option>
+            {gestionadaOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
           </select>
         </div>
 

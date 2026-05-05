@@ -7,10 +7,11 @@ import { IncidentCharts } from './components/IncidentCharts';
 import { IncidentSearchBar } from './components/IncidentSearchBar';
 import { ReceiptModal } from './components/ReceiptModal';
 import { IncidentDetailModal } from './components/IncidentDetailModal';
+import { IncidentComentariosModal } from './components/IncidentComentariosModal';
 import { WhatsAppDashboard } from './components/WhatsAppDashboard';
 import { useTransferData } from './hooks/useTransferData';
 import { useIncidentData } from './hooks/useIncidentData';
-import { updateIncidentStatus } from './services/googleSheets';
+import { updateIncidentStatus, updateGestionadaPor, updateComentarios, updateTransferViewed } from './services/googleSheets';
 import type { TransferReceipt, Incident, DashboardView } from './types/transfer';
 import './App.css';
 
@@ -20,11 +21,10 @@ const TRANSFERS_SHEET_GID = import.meta.env.VITE_SHEET_GID || '0';
 const INCIDENTS_SPREADSHEET_ID = '1e5B9tG28fE1dzthZlQVTIyvrLMzJSQTVPZpXaOhdYRc';
 const INCIDENTS_SHEET_GID = '0';
 
-// Google Apps Script Web App URL for updating incidents
-const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzHOM0yB-GvqTsAJdJI0LaiOLOwcozcnG2HHZ_7OvZiemwGphnbLFO7FUsXxrYLiXU5/exec';
+// Google Apps Script Web App URLs
+const INCIDENTS_WEB_APP_URL = import.meta.env.VITE_INCIDENTS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycby7ndSu1n9u5nPXol86sshY6KSCDEoIS0hlR7ognbh6EleDjJ11eno95aHCSOgl5E_a/exec';
+const TRANSFERS_WEB_APP_URL = import.meta.env.VITE_TRANSFERS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbzMfPUnhtSDYXA5We7zK2jrIMBrUOoDbHCi53LY73GOZgPFZhI1On0TVD-HlEJ_0pu3/exec';
 
-const VIEWED_RECEIPTS_KEY = 'granel-viewed-receipts';
-const VIEWED_INCIDENTS_KEY = 'granel-viewed-incidents';
 
 function formatLastUpdate(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
@@ -35,39 +35,19 @@ function formatLastUpdate(date: Date): string {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-function getTransferId(transfer: TransferReceipt): string {
-  return `${transfer.clientNumber}-${transfer.orderNumber}-${transfer.submissionDate}`;
-}
-
-function getIncidentId(incident: Incident): string {
-  return `${incident.incidentNumber}-${incident.clientNumber}-${incident.incidentDate}-${incident.rowIndex}`;
-}
 
 function App() {
-  // Dashboard view state
   const [currentView, setCurrentView] = useState<DashboardView>('transfers');
 
-  // Modal state
   const [selectedTransfer, setSelectedTransfer] = useState<TransferReceipt | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+  const [incidentForComentario, setIncidentForComentario] = useState<Incident | null>(null);
 
-  // Incident search state
   const [incidentSearch, setIncidentSearch] = useState('');
 
-  // Last update timestamps
   const [lastUpdateTransfers, setLastUpdateTransfers] = useState<Date | null>(null);
   const [lastUpdateIncidents, setLastUpdateIncidents] = useState<Date | null>(null);
 
-  // Viewed items state (stored separately for each dashboard)
-  const [viewedReceipts, setViewedReceipts] = useState<Set<string>>(() => {
-    const stored = localStorage.getItem(VIEWED_RECEIPTS_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  });
-
-  const [viewedIncidents, setViewedIncidents] = useState<Set<string>>(() => {
-    const stored = localStorage.getItem(VIEWED_INCIDENTS_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  });
 
   // Data hooks
   const transfersData = useTransferData({
@@ -93,33 +73,29 @@ function App() {
     }
   }, [incidentsData.allIncidents]);
 
-  // Persist viewed items to localStorage
-  useEffect(() => {
-    localStorage.setItem(VIEWED_RECEIPTS_KEY, JSON.stringify([...viewedReceipts]));
-  }, [viewedReceipts]);
-
-  useEffect(() => {
-    localStorage.setItem(VIEWED_INCIDENTS_KEY, JSON.stringify([...viewedIncidents]));
-  }, [viewedIncidents]);
 
   // Handlers for transfers
   const handleViewReceipt = (transfer: TransferReceipt) => {
-    const id = getTransferId(transfer);
-    setViewedReceipts(prev => new Set([...prev, id]));
+    // Mark as viewed in the sheet if not already viewed
+    if (!transfer.viewed) {
+      transfersData.updateLocalViewed(transfer.rowIndex, true);
+      if (TRANSFERS_WEB_APP_URL) {
+        updateTransferViewed(TRANSFERS_WEB_APP_URL, transfer.rowIndex, true);
+      }
+    }
     setSelectedTransfer(transfer);
   };
 
-  const handleToggleViewedTransfer = (transfer: TransferReceipt) => {
-    const id = getTransferId(transfer);
-    setViewedReceipts(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
+  const handleToggleViewedTransfer = async (transfer: TransferReceipt) => {
+    const newViewed = !transfer.viewed;
+    transfersData.updateLocalViewed(transfer.rowIndex, newViewed);
+    if (TRANSFERS_WEB_APP_URL) {
+      const success = await updateTransferViewed(TRANSFERS_WEB_APP_URL, transfer.rowIndex, newViewed);
+      if (!success) {
+        // Revert on failure
+        transfersData.updateLocalViewed(transfer.rowIndex, transfer.viewed);
       }
-      return newSet;
-    });
+    }
   };
 
   const handleClientClickTransfers = (clientSearch: string) => {
@@ -130,21 +106,8 @@ function App() {
   };
 
   // Handlers for incidents
-  const handleToggleViewedIncident = (incident: Incident) => {
-    const id = getIncidentId(incident);
-    setViewedIncidents(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
-  };
-
   const handleToggleIncidentStatus = async (incident: Incident) => {
-    const newStatus = incident.status.toLowerCase() === 'abierta' ? 'Cerrada' : 'Abierta';
+    const newStatus = incident.status.toLowerCase() !== 'cerrada' ? 'Cerrada' : 'Abierta';
 
     // Optimistic update - update UI immediately
     incidentsData.updateLocalStatus(incident.rowIndex, newStatus);
@@ -156,6 +119,18 @@ function App() {
         // Revert on failure
         incidentsData.updateLocalStatus(incident.rowIndex, incident.status);
         console.error('Failed to update status in sheet');
+      }
+    }
+  };
+
+  const handleUpdateGestionadaPor = async (incident: Incident, value: string) => {
+    incidentsData.updateLocalGestionadaPor(incident.rowIndex, value);
+
+    if (INCIDENTS_WEB_APP_URL) {
+      const success = await updateGestionadaPor(INCIDENTS_WEB_APP_URL, incident.rowIndex, value);
+      if (!success) {
+        incidentsData.updateLocalGestionadaPor(incident.rowIndex, incident.gestionadaPor);
+        console.error('Failed to update gestionadaPor in sheet');
       }
     }
   };
@@ -178,6 +153,21 @@ function App() {
 
   const handleCloseIncidentModal = () => {
     setSelectedIncident(null);
+  };
+
+  const handleEditComentarios = (incident: Incident) => {
+    setIncidentForComentario(incident);
+  };
+
+  const handleSaveComentario = async (incident: Incident, comentario: string) => {
+    incidentsData.updateLocalComentarios(incident.rowIndex, comentario);
+    if (INCIDENTS_WEB_APP_URL) {
+      const success = await updateComentarios(INCIDENTS_WEB_APP_URL, incident.rowIndex, comentario);
+      if (!success) {
+        incidentsData.updateLocalComentarios(incident.rowIndex, incident.comentarios);
+        console.error('Failed to update comentarios in sheet');
+      }
+    }
   };
 
   // Get current data based on view
@@ -266,8 +256,6 @@ function App() {
               onToggleViewed={handleToggleViewedTransfer}
               onClientClick={handleClientClickTransfers}
               loading={transfersData.loading}
-              viewedReceipts={viewedReceipts}
-              getTransferId={getTransferId}
             />
           </>
         )}
@@ -296,13 +284,12 @@ function App() {
 
             <IncidentTable
               incidents={filteredIncidents}
-              onToggleViewed={handleToggleViewedIncident}
               onToggleStatus={handleToggleIncidentStatus}
               onViewDetails={handleViewIncidentDetails}
+              onEditComentarios={handleEditComentarios}
               onClientClick={handleClientClickIncidents}
+              onUpdateGestionadaPor={handleUpdateGestionadaPor}
               loading={incidentsData.loading}
-              viewedIncidents={viewedIncidents}
-              getIncidentId={getIncidentId}
             />
           </>
         )}
@@ -314,6 +301,11 @@ function App() {
 
       <ReceiptModal transfer={selectedTransfer} onClose={handleCloseModal} />
       <IncidentDetailModal incident={selectedIncident} onClose={handleCloseIncidentModal} />
+      <IncidentComentariosModal
+        incident={incidentForComentario}
+        onClose={() => setIncidentForComentario(null)}
+        onSave={handleSaveComentario}
+      />
 
       <footer className="app-footer">
         <p>Dashboard Granel - by DigitalManager NATU</p>
