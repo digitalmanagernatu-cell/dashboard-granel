@@ -8,6 +8,7 @@ import { IncidentSearchBar } from './components/IncidentSearchBar';
 import { ReceiptModal } from './components/ReceiptModal';
 import { IncidentDetailModal } from './components/IncidentDetailModal';
 import { WhatsAppDashboard } from './components/WhatsAppDashboard';
+import { TransportDashboard } from './components/TransportDashboard';
 import { useTransferData } from './hooks/useTransferData';
 import { useIncidentData } from './hooks/useIncidentData';
 import { updateIncidentStatus } from './services/googleSheets';
@@ -184,11 +185,13 @@ function App() {
   const lastUpdate = currentView === 'transfers' ? lastUpdateTransfers :
                      currentView === 'incidents' ? lastUpdateIncidents : null;
   const title = currentView === 'transfers' ? 'Justificantes Transferencias' :
-                currentView === 'incidents' ? 'Incidencias' : 'Logs de WhatsApp';
+                currentView === 'incidents' ? 'Incidencias' :
+                currentView === 'whatsapp' ? 'Logs de WhatsApp' : 'Gastos de Transporte';
   const currentLoading = currentView === 'transfers' ? transfersData.loading :
                          currentView === 'incidents' ? incidentsData.loading : false;
   const currentRefresh = currentView === 'transfers' ? transfersData.refresh :
                          currentView === 'incidents' ? incidentsData.refresh : () => {};
+  // Transport view manages its own refresh button internally
 
   // Filter incidents by search term (client number, name, CIF or invoice number)
   const filteredIncidents = incidentSearch
@@ -230,6 +233,12 @@ function App() {
             onClick={() => setCurrentView('whatsapp')}
           >
             WhatsApp
+          </button>
+          <button
+            className={`nav-btn ${currentView === 'transport' ? 'active' : ''}`}
+            onClick={() => setCurrentView('transport')}
+          >
+            Transporte
           </button>
         </div>
 
@@ -309,6 +318,10 @@ function App() {
 
         {currentView === 'whatsapp' && (
           <WhatsAppDashboard />
+        )}
+
+        {currentView === 'transport' && (
+          <TransportDashboard />
         )}
       </main>
 

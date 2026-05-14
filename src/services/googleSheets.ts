@@ -1,4 +1,4 @@
-import type { TransferReceipt, Incident, WhatsAppMessage } from '../types/transfer';
+import type { TransferReceipt, Incident, WhatsAppMessage, TransportExpense, SheetTab } from '../types/transfer';
 
 /**
  * Formats a date string to DD/MM/YYYY format
@@ -237,6 +237,86 @@ export function parseDate(dateString: string): Date | null {
   // Try native parsing as fallback
   const parsed = new Date(dateString);
   return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+/**
+ * Fetches the list of all sheet tabs in a spreadsheet using Google Sheets API v4.
+ * Requires an API key. Used to detect when new sheets are added.
+ */
+export async function fetchSheetTabs(
+  spreadsheetId: string,
+  apiKey: string
+): Promise<SheetTab[]> {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties&key=${apiKey}`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error?.error?.message || `Error al obtener hojas: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  return (data.sheets || []).map((sheet: { properties: { sheetId: number; title: string; index: number } }) => ({
+    sheetId: sheet.properties.sheetId,
+    title: sheet.properties.title,
+    index: sheet.properties.index,
+  }));
+}
+
+/**
+ * Fetches transport expense data from a specific sheet tab using Google Sheets API v4.
+ * Column mapping: A=Código Cliente, B=Nombre Cliente, C=Comercial, D=Línea Negocio,
+ * E=Base Imponible, F=Total Facturas, G=SEUR, H=PALEMANIA, I=TRANSAHER, J=REDUR,
+ * K=NACEX, L=DHL, M=DHL_EXPORT, N=CORREOS, O=Total Transporte, P=% Transporte
+ */
+export async function fetchTransportExpenses(
+  spreadsheetId: string,
+  sheetTitle: string,
+  apiKey: string
+): Promise<TransportExpense[]> {
+  const encodedSheet = encodeURIComponent(`${sheetTitle}!A:P`);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodedSheet}?key=${apiKey}`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error?.error?.message || `Error al cargar datos: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const rows: string[][] = data.values || [];
+
+  if (rows.length === 0) return [];
+
+  // Skip header row
+  const dataRows = rows.slice(1);
+
+  const get = (row: string[], col: number): string => (row[col] ?? '').trim();
+
+  return dataRows
+    .filter(row => row.some(cell => cell.trim() !== ''))
+    .map((row, index) => ({
+      clientCode: get(row, 0),
+      clientName: get(row, 1),
+      comercial: get(row, 2),
+      lineaNegocio: get(row, 3),
+      baseImponible: get(row, 4),
+      totalFacturas: get(row, 5),
+      seur: get(row, 6),
+      palemania: get(row, 7),
+      transaher: get(row, 8),
+      redur: get(row, 9),
+      nacex: get(row, 10),
+      dhl: get(row, 11),
+      dhlExport: get(row, 12),
+      correos: get(row, 13),
+      totalTransporte: get(row, 14),
+      porcentajeTransporte: get(row, 15),
+      rowIndex: index,
+    }));
 }
 
 export function convertDriveUrlToViewable(url: string): string {

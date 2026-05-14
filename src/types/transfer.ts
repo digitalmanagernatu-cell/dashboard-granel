@@ -61,4 +61,37 @@ export interface WhatsAppFilters {
   searchTerm: string;
 }
 
-export type DashboardView = 'transfers' | 'incidents' | 'whatsapp';
+export type DashboardView = 'transfers' | 'incidents' | 'whatsapp' | 'transport';
+
+// Transport Expenses types
+export interface TransportExpense {
+  clientCode: string;       // A: Código Cliente
+  clientName: string;       // B: Nombre Cliente
+  comercial: string;        // C: Comercial
+  lineaNegocio: string;     // D: Línea Negocio
+  baseImponible: string;    // E: Base Imponible
+  totalFacturas: string;    // F: Total Facturas
+  seur: string;             // G: SEUR
+  palemania: string;        // H: PALEMANIA
+  transaher: string;        // I: TRANSAHER
+  redur: string;            // J: REDUR
+  nacex: string;            // K: NACEX
+  dhl: string;              // L: DHL
+  dhlExport: string;        // M: DHL_EXPORT
+  correos: string;          // N: CORREOS
+  totalTransporte: string;  // O: Total Transporte
+  porcentajeTransporte: string; // P: % Transporte
+  rowIndex: number;
+}
+
+export interface SheetTab {
+  sheetId: number;
+  title: string;
+  index: number;
+}
+
+export interface TransportFilters {
+  clientSearch: string;
+  comercialFilter: string;
+  lineaNegocioFilter: string;
+}
